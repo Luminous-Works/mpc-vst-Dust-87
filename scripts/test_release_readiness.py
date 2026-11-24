@@ -231,6 +231,20 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertTrue((ROOT / "docs" / "screenshots" / "contact-sheet.png").is_file())
         self.assertTrue((ROOT / "docs" / "screenshots" / "mix-layout.png").is_file())
 
+    def test_readme_lists_all_factory_programs_and_explains_sequencer_capture(self):
+        source = (PROJECT / "src" / "DUST87.cpp").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        programs = re.findall(r'addProgram\("([^"]+)"', source)
+
+        self.assertEqual(len(programs), 8)
+        self.assertIn("8 built-in factory programs", readme)
+        for program in programs:
+            with self.subTest(program=program):
+                self.assertIn(program, readme)
+        self.assertIn("MPC's built-in Step Sequencer", readme)
+        self.assertIn("DUST '87 is a native instrument plugin, not a sequencer", readme)
+        self.assertIn("has not been captured on MPC hardware", readme)
+
     def test_catalog_entry_uses_registry_schema_and_sdk_identity(self):
         manifest = json.loads((PROJECT / "plugin.json").read_text(encoding="utf-8"))
         entry = json.loads((ROOT / "catalog" / "plugins" / "dust87.json").read_text(encoding="utf-8"))
