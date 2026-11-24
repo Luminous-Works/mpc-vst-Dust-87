@@ -8,30 +8,39 @@
 
 ## What it is
 
-- **18 procedural percussion voices**, selected by MIDI notes 36-53; out-of-range notes wrap through the same map.
+- **18 procedural percussion voices**, with per-voice MIDI channel or note routing and an out-of-range voice fallback.
+- **Four banks of 12 pads**, each with editable MIDI channel (1-16), MIDI note (0-127), voice model, Tune, Decay, Level, Mute, Solo, and Choke Group, plus pad audition. Factory MIDI assignments follow the original design: notes 36-83 and channels 1-12 repeated across banks.
 - **Per-voice controls:** Tune, Decay, and Level.
 - **Global mix controls:** Master, Bit Depth, Sample Rate, Drive, Plate Mix, and Plate Decay.
 - **8 built-in factory programs:** Factory 87, Tape Dust, Sub Heavy, Lo-Fi Break, Crate Snare, Dry Machine, Dark Plate, and Bright 12.
-- **MPC-native sequencing:** the MPC pads and Step Sequencer send note events to the instrument; DUST '87 does not include a separate sequencer or emit MIDI.
+- **Built-in 64-step sequencer:** 18 drum lanes, four 16-step bars, adjustable swing, randomize, and per-lane clear. It follows MPC transport and triggers DUST voices internally; it does not emit MIDI.
+- **80 built-in grooves** available from a separate native BROWSE page, outside the sequencer.
 
-## Sequencing and host screenshots
+## DUST '87 step sequencer
 
-DUST '87 is a native instrument plugin, not a sequencer. The MPC's built-in Step Sequencer runs in the host and sends MIDI notes to DUST '87; there is no DUST Step Sequencer page. The screenshots in this repository show the custom plugin skin only. A Step Sequencer screenshot with DUST '87 loaded has not been captured on MPC hardware, so it is intentionally not represented by a mockup.
+The sequencer is optional and **off by default**. Enable it on the SEQ page, choose one of the 18 drum lanes and one of four bars, then tap the 16th-note steps. New steps use velocity 112. Swing ranges from 0 to 40% (default 12%); RND SEQ creates a four-bar groove and arms the sequencer. It follows the MPC host's tempo and PPQ transport, plays while the MPC transport runs, loops every four bars in 4/4, and triggers DUST's own voices. It does not send MIDI to other tracks.
+
+![Generated DUST '87 sequencer layout preview](docs/screenshots/seq-layout.png)
+
+This is a generated UI preview, not a hardware capture. RND SEQ uses the original 20 groove blueprints and variation rules while MPC remains tempo master. The native BROWSE page exposes the 80 built-in grooves as a selectable list. The original browser's genre/search filters and local MIDI-file/folder importer are not part of the native MPC SDK UI, and hardware playback has not yet been tested on an MPC.
 
 ## Touch UI
 
-The six native SDK pages are MIX, KICK, SNARE, TOMS, PERC, and MORE. DUST supplies its own brushed-aluminum faceplate, recessed dark display, beveled control wells, machined-metal knobs and faders, and segmented-button artwork. Every knob also has a page-accented ring that follows a hidden, non-automatable MIDI-velocity pulse; the colored dust particles remain part of each page. The previews below are composed from those assets and the `ui.json` control layout, not captured from an MPC.
+The native skin presents five visible pages: MIX, DRUMS, PAD, SEQ, and BROWSE. DRUMS keeps the original four-bank 4×3 pad-grid interaction together instead of splitting drum families into separate pages. PAD edits the currently selected pad; BROWSE is a separate page and is not embedded in SEQ. The SDK skin has no web-style long-press context sheet, so pad editing is presented on PAD rather than in a browser overlay. A hidden SEQCTL helper page supplies sequencer controls and is merged into SEQ during skin preparation.
+
+The PAD page preserves the original Pad Context Sheet's channel, note, routing, and audition functions. Per-Voice Channel is the default routing mode and uses the first pad assigned to an incoming channel; Combo by Note routes matching notes directly to their pad assignments. The two routing modes intentionally follow the original implementation, including its repeated factory channel assignments across banks.
+
+DUST supplies its own brushed-aluminum faceplate, recessed dark display, beveled control wells, machined-metal knobs and faders, and segmented-button artwork. Every sound knob also has a page-accented ring that follows a hidden, non-automatable MIDI-velocity pulse; the colored dust particles remain part of each page. The previews below are composed from those assets and the `ui.json` control layout, not captured from an MPC.
 
 ![Generated MIX-page layout preview](docs/screenshots/mix-layout.png)
 
 | Page | Controls |
 |------|----------|
 | MIX | Master, Bit Depth, Sample Rate, Drive, Plate Mix, Plate Decay |
-| KICK | Kick, Sub, Snare, and Crack Tune/Decay/Level |
-| SNARE | Rim, Clap, closed-hat, and open-hat Tune/Decay/Level |
-| TOMS | Low, mid, and high tom plus Crash Tune/Decay/Level |
-| PERC | Ride, Cowbell, Clave, and Shaker Tune/Decay/Level |
-| MORE | Metal and Zap Tune/Decay/Level |
+| DRUMS | Bank selection and 12 pads from the active bank |
+| PAD | Selected pad, voice model, Tune, Decay, Level, Mute, Solo, Choke Group, MIDI Channel, MIDI Note, MIDI Routing, Audition Pad, Randomize, Reset |
+| SEQ | 64-step editor, voice lane, bar selection, swing, randomize, and clear |
+| BROWSE | Selection and load action for 80 built-in grooves |
 
 ## Build and host-test
 
@@ -40,7 +49,7 @@ Check out the [MPC Plugin Builder SDK](https://github.com/inmusic-software/mpc-p
 ```sh
 python tools/build.py /path/to/mpc-vst-Dust-87 --target native
 python tools/gen_ui.py --params /path/to/mpc-vst-Dust-87/build/params.json --out /path/to/mpc-vst-Dust-87/build/generated-skin --kit-cache /path/to/mpc-vst-Dust-87/build --ui /path/to/mpc-vst-Dust-87/ui.json
-python /path/to/mpc-vst-Dust-87/tools/prepare_mpc_skin.py --generated /path/to/mpc-vst-Dust-87/build/generated-skin
+python /path/to/mpc-vst-Dust-87/tools/prepare_mpc_skin.py --generated /path/to/mpc-vst-Dust-87/build/generated-skin --params /path/to/mpc-vst-Dust-87/build/params.json --output /path/to/mpc-vst-Dust-87/skins
 python tools/build.py /path/to/mpc-vst-Dust-87 --target all
 ```
 
@@ -71,13 +80,15 @@ Before publishing, test the exact draft-release ZIP on the target device: verify
 
 ```text
 plugin.json                      MPC SDK manifest
-ui.json                          six-page MPC touch UI definition
-src/DUST87.cpp                   native instrument implementation
+ui.json                          MPC touch UI page and control layout
+src/DUST87.cpp                   native instrument, pad grid, and sequencer implementation
+src/sequencer_clock.h            PPQ/swing clock for the 64-step loop
+src/groove_library.h             80 built-in grooves and randomizer blueprints
 docs/screenshots/                generated UI layout previews
 assets/                           custom backgrounds and native control artwork
 tools/render_skin.py              custom MPC skin asset generator
 tools/render_ui_previews.py      preview image generator
-tools/prepare_mpc_skin.py        native beat-reactive knob overlay preparer
+tools/prepare_mpc_skin.py        native sequencer and beat-ring skin preparer
 catalog/plugins/dust87.json      proposed Open-MPC registry metadata
 .github/workflows/               pinned SDK build and release workflow
 scripts/test_release_readiness.py manifest, UI, catalog, and workflow checks
