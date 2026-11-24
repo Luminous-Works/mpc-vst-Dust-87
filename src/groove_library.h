@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <string>
 
 namespace mpc::dust87 {
 
@@ -474,6 +475,160 @@ inline float generateRandomGroove(GroovePattern& pattern, uint32_t& state)
     const double swing = blueprint.swing + (nextGrooveUnit(state) - 0.5) * 0.12;
     const double boundedSwing = swing < 0.0 ? 0.0 : (swing > 0.34 ? 0.34 : swing);
     return static_cast<float>(std::round(boundedSwing * 100.0) / 100.0);
+}
+
+constexpr size_t kBuiltinGrooveCount = 80;
+
+struct BuiltinGroove
+{
+    std::string name;
+    const char* genre = "";
+    int bpm = 120;
+    float swing = 0.0f;
+    GroovePattern pattern{};
+};
+
+inline int builtinGrooveBlueprintIndex(size_t presetIndex)
+{
+    static constexpr int kLoFiPool[] = {13, 4, 2, 1, 5, 0, 15, 7};
+    static constexpr int kBoomBapPool[] = {4, 1, 2, 13, 15, 0, 7, 17};
+    static constexpr int kElectroPool[] = {3, 18, 19, 9, 12, 8, 16, 11};
+    static constexpr int kIndustrialPool[] = {9, 12, 16, 3, 8, 11, 18, 19};
+    static constexpr int kDubPool[] = {5, 11, 15, 2, 10, 6, 13, 16};
+    static constexpr int kPercussionPool[] = {6, 10, 14, 16, 0, 2, 17, 7};
+    static constexpr int kExperimentalPool[] = {16, 8, 9, 0, 12, 13, 15, 7};
+    const size_t category = presetIndex / 8;
+    const size_t position = presetIndex % 8;
+    if (category == 1) return kLoFiPool[position];
+    if (category == 2) return kBoomBapPool[position];
+    if (category == 3) return kElectroPool[position];
+    if (category == 4) return kIndustrialPool[position];
+    if (category == 5) return kDubPool[position];
+    if (category == 6) return kPercussionPool[position];
+    if (category == 7) return kExperimentalPool[position];
+    return static_cast<int>(presetIndex % (sizeof(kGrooveBlueprints) / sizeof(kGrooveBlueprints[0])));
+}
+
+inline GrooveBar mutatePresetHitArray(const GrooveBar& base, int seed, int laneSalt)
+{
+    GrooveBar result = base;
+    const int shiftSlot = (seed * 3 + laneSalt * 5) % kGrooveStepsPerBar;
+    const int ghostSlot = (seed * 7 + laneSalt * 11 + 3) % kGrooveStepsPerBar;
+    if (result[static_cast<size_t>(shiftSlot)] == 0 && shiftSlot % 4 != 0)
+        result[static_cast<size_t>(shiftSlot)] =
+            static_cast<uint8_t>(66 + ((seed * 13) % 32));
+    uint8_t& ghost = result[static_cast<size_t>(ghostSlot)];
+    if (ghost > 0 && ghostSlot != 0 && ghostSlot != 4 && ghostSlot != 12)
+    {
+        const int adjustment = ((seed + laneSalt) % 3 - 1) * 14;
+        const int varied = static_cast<int>(ghost) + adjustment;
+        ghost = static_cast<uint8_t>(varied < 48 ? 48 : (varied > 124 ? 124 : varied));
+    }
+    return result;
+}
+
+inline bool getBuiltinGroove(size_t presetIndex, BuiltinGroove& result)
+{
+    if (presetIndex >= kBuiltinGrooveCount)
+        return false;
+
+    const int blueprintIndex = builtinGrooveBlueprintIndex(presetIndex);
+    const GrooveBlueprint& blueprint = kGrooveBlueprints[static_cast<size_t>(blueprintIndex)];
+    const int bpmJitter = static_cast<int>((presetIndex * 5) % 11) - 5;
+    const int bpm = blueprint.bpm + bpmJitter;
+    const int swingCents = static_cast<int>(std::lround(blueprint.swing * 100.0f)) +
+                           (static_cast<int>(presetIndex % 5) - 2) * 2;
+
+    result.name = std::string(blueprint.name) + " #" +
+                  std::to_string((presetIndex % 8) + 1);
+    result.genre = blueprint.genre;
+    result.bpm = bpm < 66 ? 66 : (bpm > 170 ? 170 : bpm);
+    result.swing = static_cast<float>(swingCents < 0 ? 0 :
+        (swingCents > 36 ? 36 : swingCents)) * 0.01f;
+    result.pattern = {};
+
+    const GrooveBar kickB1 = mutatePresetHitArray(blueprint.kick, static_cast<int>(presetIndex), 1);
+    const GrooveBar kickB2 = mutatePresetHitArray(
+        blueprint.hasKickB2 ? blueprint.kickB2 : blueprint.kick,
+        static_cast<int>(presetIndex + 1), 2);
+    const GrooveBar kickB4 = mutatePresetHitArray(
+        blueprint.hasKickB4 ? blueprint.kickB4 : blueprint.kick,
+        static_cast<int>(presetIndex + 3), 3);
+    repeatGrooveBar(result.pattern, 0, kickB1, 120, &kickB2, &kickB4);
+
+    const GrooveBar empty{};
+    const GrooveBar snareB1 = blueprint.hasSnare
+        ? mutatePresetHitArray(blueprint.snare, static_cast<int>(presetIndex), 4)
+        : empty;
+    const GrooveBar snareB2 = (blueprint.hasSnare || blueprint.hasSnareB2)
+        ? mutatePresetHitArray(blueprint.hasSnareB2 ? blueprint.snareB2 : blueprint.snare,
+                               static_cast<int>(presetIndex + 2), 5)
+        : empty;
+    const GrooveBar snareB4 = (blueprint.hasSnareB4 || blueprint.hasSnare)
+        ? mutatePresetHitArray(blueprint.hasSnareB4 ? blueprint.snareB4 : blueprint.snare,
+                               static_cast<int>(presetIndex + 4), 6)
+        : empty;
+    if (blueprint.hasSnare || blueprint.hasSnareB2 || blueprint.hasSnareB4)
+        repeatGrooveBar(result.pattern, 2, snareB1, 114, &snareB2, &snareB4);
+
+    GrooveBar tomFillH{};
+    GrooveBar tomFillM{};
+    GrooveBar tomFillL{};
+    if (presetIndex % 3 == 0)
+    {
+        tomFillH[11] = 96;
+        tomFillM[13] = 104;
+        tomFillL[15] = 112;
+    }
+    else if (presetIndex % 3 == 1)
+    {
+        tomFillH[12] = 94;
+        tomFillM[14] = 102;
+        tomFillL[15] = 108;
+    }
+    else
+    {
+        tomFillM[10] = 92;
+        tomFillL[12] = 102;
+        tomFillL[14] = 110;
+    }
+
+    repeatGrooveBar(result.pattern, 8, blueprint.hasTomL ? blueprint.tomL : empty,
+                    102, nullptr, &tomFillL);
+    repeatGrooveBar(result.pattern, 9, blueprint.hasTomM ? blueprint.tomM : empty,
+                    100, nullptr, &tomFillM);
+    repeatGrooveBar(result.pattern, 10, blueprint.hasTomH ? blueprint.tomH : empty,
+                    98, nullptr, &tomFillH);
+
+    if (blueprint.hasRim)
+    {
+        const GrooveBar rim = mutatePresetHitArray(
+            blueprint.rim, static_cast<int>(presetIndex), 7);
+        repeatGrooveBar(result.pattern, 4, rim, 104, nullptr,
+                        blueprint.hasRimB4 ? &blueprint.rimB4 : nullptr);
+    }
+    if (blueprint.hasClap)
+        repeatGrooveBar(result.pattern, 5,
+                        mutatePresetHitArray(blueprint.clap, static_cast<int>(presetIndex), 8),
+                        108);
+    if (blueprint.hasHatC)
+        repeatGrooveBar(result.pattern, 6,
+                        mutatePresetHitArray(blueprint.hatC, static_cast<int>(presetIndex), 9),
+                        92);
+    if (blueprint.hasHatO)
+        repeatGrooveBar(result.pattern, 7, blueprint.hatO, 98);
+    if (blueprint.hasCrash)
+        result.pattern[11][0] = 108;
+    if (blueprint.hasRide)
+        repeatGrooveBar(result.pattern, 12,
+                        mutatePresetHitArray(blueprint.ride, static_cast<int>(presetIndex), 10),
+                        102);
+    if (blueprint.hasBell)
+        repeatGrooveBar(result.pattern, 13,
+                        mutatePresetHitArray(blueprint.bell, static_cast<int>(presetIndex), 11),
+                        98);
+
+    return true;
 }
 
 } // namespace mpc::dust87

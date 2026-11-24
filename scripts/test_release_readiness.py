@@ -15,13 +15,6 @@ sys.path.insert(0, str(ROOT))
 from tools.prepare_mpc_skin import prepare_skin
 
 
-DRUM_LABELS = [
-    "Kick", "Sub", "Snare", "Crack", "Rim", "Clap", "CHat", "OHat",
-    "LoTom", "MidTom", "HiTom", "Crash", "Ride", "CBell", "Clave",
-    "Shaker", "Metal", "Zap",
-]
-
-
 class ReleaseReadinessTests(unittest.TestCase):
     def png_dimensions(self, path):
         image = path.read_bytes()
@@ -50,6 +43,34 @@ class ReleaseReadinessTests(unittest.TestCase):
             },
             {"Lane", "Bar", "Seq", "Swing", "Rnd Seq", "Clear"},
         )
+
+    def test_native_drum_grid_and_groove_browser_follow_the_original_page_structure(self):
+        ui = json.loads((PROJECT / "ui.json").read_text(encoding="utf-8"))
+        pages = {page["name"]: page for page in ui["pages"]}
+        drum_controls = [
+            control["param"]
+            for control in pages["DRUMS"]["controls"]
+            if isinstance(control, dict)
+        ]
+        self.assertEqual(
+            drum_controls,
+            ["Bank"] + [f"Pad {pad:02d}" for pad in range(1, 13)],
+        )
+        self.assertEqual(
+            [control["param"] for control in pages["PAD"]["controls"]
+             if isinstance(control, dict)],
+            [
+                "Selected Pad", "Voice Model", "Pad Tune", "Pad Decay", "Pad Level",
+                "Mute Voice", "Solo Voice", "Choke Group", "Randomize Voice",
+                "Reset Voice",
+            ],
+        )
+        self.assertEqual(
+            [control["param"] for control in pages["BROWSE"]["controls"]
+             if isinstance(control, dict)],
+            ["Groove", "Load Groove"],
+        )
+        self.assertFalse({"KICK", "SNARE", "TOMS", "PERC"} & set(pages))
 
     def test_native_sequence_clock_respects_swing_and_four_bar_loop(self):
         compiler = shutil.which("g++")
@@ -108,9 +129,13 @@ class ReleaseReadinessTests(unittest.TestCase):
 
     def test_touch_ui_covers_every_native_parameter(self):
         ui = json.loads((PROJECT / "ui.json").read_text(encoding="utf-8"))
-        expected = {"Master", "Bit Depth", "Sample Rate", "Drive", "Plate Mix", "Plate Decay"}
-        for label in DRUM_LABELS:
-            expected.update({f"{label} Tune", f"{label} Decay", f"{label} Level"})
+        expected = {
+            "Master", "Bit Depth", "Sample Rate", "Drive", "Plate Mix", "Plate Decay",
+            "Bank", "Selected Pad", "Voice Model", "Pad Tune", "Pad Decay", "Pad Level",
+            "Mute Voice", "Solo Voice", "Choke Group", "Randomize Voice", "Reset Voice",
+            "Groove", "Load Groove",
+        }
+        expected.update({f"Pad {pad:02d}" for pad in range(1, 13)})
         expected.update({f"Step {step:02d}" for step in range(1, 17)})
         expected.update({"Lane", "Bar", "Seq", "Swing", "Rnd Seq", "Clear"})
 
@@ -123,7 +148,6 @@ class ReleaseReadinessTests(unittest.TestCase):
 
         self.assertEqual(referenced, expected)
         self.assertNotIn("Playhead", referenced)
-        self.assertEqual(ui["qlinkGroups"], "rows")
 
     def test_native_ui_uses_custom_brand_skin_assets(self):
         ui = json.loads((PROJECT / "ui.json").read_text(encoding="utf-8"))
@@ -132,8 +156,7 @@ class ReleaseReadinessTests(unittest.TestCase):
 
         backgrounds = []
         for page in ui["pages"]:
-            background = page.get("background")
-            self.assertTrue(background, f"{page['name']} page is missing its designed background")
+            background = f"{page['name'].lower()}-bg.png"
             backgrounds.append(background)
             self.assertEqual(self.png_dimensions(ROOT / "assets" / background), (1280, 628))
 
@@ -142,6 +165,8 @@ class ReleaseReadinessTests(unittest.TestCase):
             "knob_uni.png": (90, 90 * 127),
             "knob_bi.png": (90, 90 * 127),
             "fader_h_uni.png": (248, 36 * 127),
+            "pad_button_on.png": (278, 80),
+            "pad_button_off.png": (278, 80),
             "seg4_on.png": (58, 40),
             "seg4_off.png": (58, 40),
             "seq_step_on.png": (54, 52),
@@ -153,6 +178,31 @@ class ReleaseReadinessTests(unittest.TestCase):
         for filename, dimensions in expected_assets.items():
             with self.subTest(asset=filename):
                 self.assertEqual(self.png_dimensions(ROOT / "assets" / filename), dimensions)
+
+    def test_native_tabs_bind_the_custom_aluminum_backgrounds(self):
+        ui = json.loads((PROJECT / "ui.json").read_text(encoding="utf-8"))
+        tui = json.loads((PROJECT / "skins" / "TUI.json").read_text(encoding="utf-8"))
+        visible_pages = [page for page in ui["pages"] if page["name"] != "SEQCTL"]
+        tabs = tui["pageData"]["tabs"]
+        self.assertEqual(len(tabs), len(visible_pages))
+        self.assertEqual(
+            [tab["tabName"] for tab in tabs],
+            [page["name"] for page in visible_pages],
+        )
+        for page, tab in zip(visible_pages, tabs):
+            with self.subTest(page=page["name"]):
+                background = tab["componentDefinition"]["componentsData"][0]
+                self.assertEqual(background["componentData"]["type"], "Image")
+                self.assertEqual(
+                    background["componentData"]["data"],
+                    {
+                        "version": 2,
+                        "imageType": "Regular",
+                        "colour": "0",
+                        "image": f"{page['name'].lower()}-bg.png",
+                    },
+                )
+                self.assertEqual(background["bounds"]["bounds"], "0 0 1280 628")
 
     def test_native_knob_rings_follow_the_midi_velocity_pulse(self):
         source = (PROJECT / "src" / "DUST87.cpp").read_text(encoding="utf-8")
@@ -175,7 +225,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 if child["componentData"]["type"].startswith(("knobUniPulse_", "knobBiPulse_"))
             ]
             expected_knobs = sum(
-                control.get("widget") == "knob"
+                control.get("widget") == "knob" and control.get("overlay") != "menu"
                 for control in ui["pages"][page_index]["controls"]
                 if isinstance(control, dict)
             )
@@ -311,6 +361,8 @@ class ReleaseReadinessTests(unittest.TestCase):
                             "fader": "faderUni",
                             "switch": "radio4",
                         }[widget]
+                        if widget == "knob" and spec.get("overlay") == "menu":
+                            component_type = "knobUniMenu"
                         components.append(control(spec["param"], component_type))
                 tabs.append({
                     "tabName": page["name"],
@@ -356,16 +408,19 @@ class ReleaseReadinessTests(unittest.TestCase):
                 entry["key"]: entry["value"]
                 for entry in page_data["componentDefinitions"]["localComponentDefinitions"]
             }
-            self.assertEqual(len(page_data["tabs"]), 6)
+            self.assertEqual(len(page_data["tabs"]), 5)
             self.assertNotIn("toggle", definitions)
-            for page, tab in zip(pages[:6], page_data["tabs"]):
+            for page, tab in zip(
+                [page for page in pages if page["name"] != "SEQCTL"],
+                page_data["tabs"],
+            ):
                 components = tab["componentDefinition"]["componentsData"]
                 knobs = [
                     instance for instance in components
                     if instance["componentData"]["type"].startswith(("knobUniPulse_", "knobBiPulse_"))
                 ]
                 expected_knobs = sum(
-                    control.get("widget") == "knob"
+                    control.get("widget") == "knob" and control.get("overlay") != "menu"
                     for control in page["controls"]
                     if isinstance(control, dict)
                 )
@@ -385,13 +440,13 @@ class ReleaseReadinessTests(unittest.TestCase):
                         f"pulse_ring_{page['name'].lower()}.png",
                     )
 
-            sequence_components = page_data["tabs"][5]["componentDefinition"]["componentsData"]
+            sequence_components = page_data["tabs"][3]["componentDefinition"]["componentsData"]
             self.assertEqual(
                 sum(component["componentData"]["type"] == "sequenceStep"
                     for component in sequence_components),
                 16,
             )
-            self.assertEqual(page_data["tabs"][5]["qlinkBoundsData"], [])
+            self.assertEqual(page_data["tabs"][3]["qlinkBoundsData"], [])
             for entry in page_data["componentDefinitions"]["localComponentDefinitions"]:
                 for image_name in self.referenced_images(entry["value"]):
                     self.assertTrue(
@@ -400,8 +455,8 @@ class ReleaseReadinessTests(unittest.TestCase):
                     )
             qlinks = json.loads((output / "Q-Links.json").read_text(encoding="utf-8"))
             qlink_tabs = qlinks["Screen Mode Q-Links"]["map"]
-            self.assertEqual([item["Tab"] for item in qlink_tabs], list(range(1, 7)))
-            self.assertEqual(qlink_tabs[5]["Q-Links"], {"Q-Link 1": -1})
+            self.assertEqual([item["Tab"] for item in qlink_tabs], list(range(1, 6)))
+            self.assertTrue(all(value == -1 for value in qlink_tabs[3]["Q-Links"].values()))
 
     def referenced_images(self, value):
         if isinstance(value, dict):
@@ -435,6 +490,9 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertIn("docs/screenshots/contact-sheet.png", readme)
         self.assertIn("docs/screenshots/mix-layout.png", readme)
         self.assertIn("not screenshots captured from MPC hardware", readme)
+        self.assertIn("80 built-in grooves", readme)
+        self.assertIn("BROWSE", readme)
+        self.assertNotIn("pages are MIX, KICK, SNARE, TOMS, PERC", readme)
         self.assertTrue((ROOT / "docs" / "screenshots" / "contact-sheet.png").is_file())
         self.assertTrue((ROOT / "docs" / "screenshots" / "mix-layout.png").is_file())
         self.assertTrue((ROOT / "docs" / "screenshots" / "seq-layout.png").is_file())

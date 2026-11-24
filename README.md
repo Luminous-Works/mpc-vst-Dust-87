@@ -8,11 +8,13 @@
 
 ## What it is
 
-- **18 procedural percussion voices**, selected by MIDI notes 36-53; out-of-range notes wrap through the same map.
+- **18 procedural percussion voices**, with direct MIDI note selection and an out-of-range voice fallback.
+- **Four banks of 12 pads**, with MIDI notes 36-83 selecting the 48 pad assignments. Each pad can select a voice model and adjust Tune, Decay, Level, Mute, Solo, and Choke Group.
 - **Per-voice controls:** Tune, Decay, and Level.
 - **Global mix controls:** Master, Bit Depth, Sample Rate, Drive, Plate Mix, and Plate Decay.
 - **8 built-in factory programs:** Factory 87, Tape Dust, Sub Heavy, Lo-Fi Break, Crate Snare, Dry Machine, Dark Plate, and Bright 12.
 - **Built-in 64-step sequencer:** 18 drum lanes, four 16-step bars, adjustable swing, randomize, and per-lane clear. It follows MPC transport and triggers DUST voices internally; it does not emit MIDI.
+- **80 built-in grooves** available from a separate native BROWSE page, outside the sequencer.
 
 ## DUST '87 step sequencer
 
@@ -20,22 +22,23 @@ The sequencer is optional and **off by default**. Enable it on the SEQ page, cho
 
 ![Generated DUST '87 sequencer layout preview](docs/screenshots/seq-layout.png)
 
-This is a generated UI preview, not a hardware capture. RND SEQ uses the original 20 groove blueprints and variation rules while MPC remains tempo master. The native build does not include the browser prototype's 80-groove browser or MIDI-file import, and hardware playback has not yet been tested on an MPC.
+This is a generated UI preview, not a hardware capture. RND SEQ uses the original 20 groove blueprints and variation rules while MPC remains tempo master. The native BROWSE page exposes the 80 built-in grooves as a selectable list. The original browser's genre/search filters and local MIDI-file/folder importer are not part of the native MPC SDK UI, and hardware playback has not yet been tested on an MPC.
 
 ## Touch UI
 
-The six native SDK pages are MIX, KICK, SNARE, TOMS, PERC, and SEQ. MIX also contains the Metal and Zap voice controls to keep the sequencer within the MPC's six-page touch UI. DUST supplies its own brushed-aluminum faceplate, recessed dark display, beveled control wells, machined-metal knobs and faders, and segmented-button artwork. Every sound knob also has a page-accented ring that follows a hidden, non-automatable MIDI-velocity pulse; the colored dust particles remain part of each page. The previews below are composed from those assets and the `ui.json` control layout, not captured from an MPC.
+The native skin presents five visible pages: MIX, DRUMS, PAD, SEQ, and BROWSE. DRUMS keeps the original four-bank 4×3 pad-grid interaction together instead of splitting drum families into separate pages. PAD edits the currently selected pad; BROWSE is a separate page and is not embedded in SEQ. The SDK skin has no web-style long-press context sheet, so pad editing is presented on PAD rather than in a browser overlay. A hidden SEQCTL helper page supplies sequencer controls and is merged into SEQ during skin preparation.
+
+DUST supplies its own brushed-aluminum faceplate, recessed dark display, beveled control wells, machined-metal knobs and faders, and segmented-button artwork. Every sound knob also has a page-accented ring that follows a hidden, non-automatable MIDI-velocity pulse; the colored dust particles remain part of each page. The previews below are composed from those assets and the `ui.json` control layout, not captured from an MPC.
 
 ![Generated MIX-page layout preview](docs/screenshots/mix-layout.png)
 
 | Page | Controls |
 |------|----------|
-| MIX | Master, Bit Depth, Sample Rate, Drive, Plate Mix, Plate Decay, Metal and Zap Tune/Decay/Level |
-| KICK | Kick, Sub, Snare, and Crack Tune/Decay/Level |
-| SNARE | Rim, Clap, closed-hat, and open-hat Tune/Decay/Level |
-| TOMS | Low, mid, and high tom plus Crash Tune/Decay/Level |
-| PERC | Ride, Cowbell, Clave, and Shaker Tune/Decay/Level |
+| MIX | Master, Bit Depth, Sample Rate, Drive, Plate Mix, Plate Decay |
+| DRUMS | Bank selection and 12 pads from the active bank |
+| PAD | Selected pad, voice model, Tune, Decay, Level, Mute, Solo, Choke Group, Randomize, Reset |
 | SEQ | 64-step editor, voice lane, bar selection, swing, randomize, and clear |
+| BROWSE | Selection and load action for 80 built-in grooves |
 
 ## Build and host-test
 
@@ -44,7 +47,7 @@ Check out the [MPC Plugin Builder SDK](https://github.com/inmusic-software/mpc-p
 ```sh
 python tools/build.py /path/to/mpc-vst-Dust-87 --target native
 python tools/gen_ui.py --params /path/to/mpc-vst-Dust-87/build/params.json --out /path/to/mpc-vst-Dust-87/build/generated-skin --kit-cache /path/to/mpc-vst-Dust-87/build --ui /path/to/mpc-vst-Dust-87/ui.json
-python /path/to/mpc-vst-Dust-87/tools/prepare_mpc_skin.py --generated /path/to/mpc-vst-Dust-87/build/generated-skin
+python /path/to/mpc-vst-Dust-87/tools/prepare_mpc_skin.py --generated /path/to/mpc-vst-Dust-87/build/generated-skin --params /path/to/mpc-vst-Dust-87/build/params.json --output /path/to/mpc-vst-Dust-87/skins
 python tools/build.py /path/to/mpc-vst-Dust-87 --target all
 ```
 
@@ -75,9 +78,10 @@ Before publishing, test the exact draft-release ZIP on the target device: verify
 
 ```text
 plugin.json                      MPC SDK manifest
-ui.json                          MPC touch UI and sequencer controls
-src/DUST87.cpp                   native instrument and sequencer implementation
+ui.json                          MPC touch UI page and control layout
+src/DUST87.cpp                   native instrument, pad grid, and sequencer implementation
 src/sequencer_clock.h            PPQ/swing clock for the 64-step loop
+src/groove_library.h             80 built-in grooves and randomizer blueprints
 docs/screenshots/                generated UI layout previews
 assets/                           custom backgrounds and native control artwork
 tools/render_skin.py              custom MPC skin asset generator

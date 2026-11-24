@@ -51,7 +51,17 @@ def render_control(image, control, index, style, page_name):
     text = argb(style.get("text"), "#ffffff")
     muted = argb(style.get("muted"), "#8290a1")
 
-    if widget == "knob":
+    if widget == "knob" and control.get("overlay") == "menu":
+        draw.text((left + 15, top + 8), label, fill=text, font=font(15, bold=True))
+        draw.rounded_rectangle(
+            (left + 15, top + 43, left + 262, top + 84),
+            radius=6,
+            fill="#111821",
+            outline="#AEBBC7",
+            width=1,
+        )
+        draw.text((left + 25, top + 54), "SELECT", fill="#F5A623", font=font(13, bold=True))
+    elif widget == "knob":
         filename = "knob_bi.png" if label.endswith("Tune") else "knob_uni.png"
         image.alpha_composite(
             frame_image(f"pulse_ring_{page_name}.png", FRAME, 106),
@@ -78,8 +88,10 @@ def render_control(image, control, index, style, page_name):
 def render_page(page, ui):
     if page["name"] == "SEQ":
         return render_sequence_page(ui)
+    if page["name"] == "DRUMS":
+        return render_drum_page(page, ui)
 
-    background = Image.open(ASSETS / page["background"]).convert("RGBA")
+    background = Image.open(ASSETS / f"{page['name'].lower()}-bg.png").convert("RGBA")
     for index, control in enumerate(page["controls"]):
         render_control(
             background,
@@ -95,9 +107,43 @@ def render_page(page, ui):
     return background.convert("RGB")
 
 
+def render_drum_page(page, ui):
+    background = Image.open(ASSETS / f"{page['name'].lower()}-bg.png").convert("RGBA")
+    draw = ImageDraw.Draw(background)
+    draw.text((37, 69), "BANK A  /  TAP TO AUDITION  /  OPEN PAD TO EDIT",
+              fill="#f5a623", font=font(12, bold=True))
+    default_names = [
+        "KICK '87", "SNARE '87", "RIMSHOT", "CLAP 12B",
+        "CLOSED HAT", "OPEN HAT", "LOW TOM", "MID TOM",
+        "HIGH TOM", "CRASH 12", "RIDE 87", "FM COWBELL",
+    ]
+    for pad, name in enumerate(default_names):
+        column, row = pad % 4, pad // 4
+        left, top = 24 + column * 307, 160 + row * 140
+        background.alpha_composite(
+            Image.open(ASSETS / "pad_button_off.png").convert("RGBA"),
+            (left + 10, top + 27),
+        )
+        draw = ImageDraw.Draw(background)
+        draw.ellipse(
+            (left + 23, top + 42, left + 31, top + 50),
+            fill=("#FB7185", "#F5A623", "#A78BFA", "#F5A623")[pad % 4],
+        )
+        draw.text((left + 44, top + 37), f"PAD {pad + 1:02d}",
+                  fill="#dbe4ec", font=font(11, bold=True))
+        draw.text((left + 22, top + 68), name,
+                  fill="#f8fafc", font=font(14, bold=True))
+        draw.text((left + 22, top + 94), f"N{36 + pad}",
+                  fill="#94a3b8", font=font(10, bold=True))
+
+    draw.text((WIDTH - 264, HEIGHT - 20), "GENERATED PREVIEW / NOT A DEVICE CAPTURE",
+              fill=(128, 145, 161, 230), font=font(9, bold=True))
+    return background.convert("RGB")
+
+
 def render_sequence_page(ui):
     page = next(page for page in ui["pages"] if page["name"] == "SEQ")
-    background = Image.open(ASSETS / page["background"]).convert("RGBA")
+    background = Image.open(ASSETS / f"{page['name'].lower()}-bg.png").convert("RGBA")
     draw = ImageDraw.Draw(background)
 
     draw.text((120, 94), "LANE", fill="#b9c5cf", font=font(11, bold=True))

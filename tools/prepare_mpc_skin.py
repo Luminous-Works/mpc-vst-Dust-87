@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add MIDI-beat pulse overlays to an SDK-generated MPC touch skin."""
+"""Add DUST '87 backgrounds and MIDI-beat pulse overlays to the MPC touch skin."""
 
 import argparse
 import copy
@@ -39,6 +39,32 @@ def _parameter_index(params_path, name):
     if not isinstance(parameter.get("index"), int):
         raise ValueError(f"{name} parameter index is missing or invalid")
     return parameter["index"]
+
+
+def _background_component(filename):
+    return {
+        "version": 2,
+        "componentData": {
+            "version": 1,
+            "name": "DUST '87 aluminum background",
+            "type": "Image",
+            "data": {
+                "version": 2,
+                "imageType": "Regular",
+                "colour": "0",
+                "image": filename,
+            },
+        },
+        "handle remapping": {"version": 1, "map": []},
+        "bounds": {
+            "version": 1,
+            "acceptsHWFocus": "No",
+            "showWhenDataModelInvalid": "Show",
+            "whenVisible": "Always",
+            "boundsType": "Absolute",
+            "bounds": "0 0 1280 628",
+        },
+    }
 
 
 def _pulse_component(filename):
@@ -145,6 +171,28 @@ def _sequence_lane_definition(knob_definition):
     return definition
 
 
+def _pad_action_definition(toggle_definition):
+    definition = copy.deepcopy(toggle_definition)
+    for child in definition["componentsData"]:
+        kind = child["componentData"]["type"]
+        if kind == "Focus":
+            _component_bounds(child, "0 0 298 115")
+        elif kind == "Label" and child["componentData"]["name"] == "name":
+            child["componentData"]["data"]["textStyle"]["font"]["height"] = 13.0
+            child["componentData"]["data"]["textStyle"]["justification"] = "horizontallyCentred"
+            _component_bounds(child, "4 3 290 21")
+        elif kind == "Label":
+            continue
+        elif kind == "Button":
+            button = child["componentData"]["data"]
+            button["onImage"] = "pad_button_on.png"
+            button["offImage"] = "pad_button_off.png"
+            button["buttonId"] = 1
+            button["numButtonsInGroup"] = 1
+            _component_bounds(child, "10 27 278 80")
+    return definition
+
+
 def _playhead_component(parameter_index):
     return {
         "version": 2,
@@ -222,6 +270,7 @@ def prepare_skin(generated_dir, params_path, output_dir):
     for page, tab in zip(pages, tabs):
         page_name = page["name"].lower()
         components = tab["componentDefinition"]["componentsData"]
+        components.insert(0, _background_component(f"{page_name}-bg.png"))
         for instance in components:
             component_data = instance.get("componentData", {})
             base_type = component_data.get("type")
@@ -263,11 +312,13 @@ def prepare_skin(generated_dir, params_path, output_dir):
     sequence_toggle_type = "sequenceToggle"
     sequence_action_type = "sequenceAction"
     sequence_lane_type = "sequenceLane"
+    pad_action_type = "padAction"
     for name, definition in (
         (sequence_step_type, _sequence_step_definition(definitions["toggle"])),
         (sequence_toggle_type, _sequence_control_definition(definitions["toggle"])),
         (sequence_action_type, _sequence_control_definition(definitions["toggle"], action=True)),
         (sequence_lane_type, _sequence_lane_definition(definitions["knobUniMenu"])),
+        (pad_action_type, _pad_action_definition(definitions["toggle"])),
     ):
         if name not in generated_definitions:
             definition_entries.append({"key": name, "value": definition})
@@ -302,6 +353,28 @@ def prepare_skin(generated_dir, params_path, output_dir):
         instance["componentData"]["type"] = component_type
         _component_bounds(instance, bounds)
         sequence_components.append(instance)
+
+    if "DRUMS" not in page_indices:
+        raise ValueError("ui.json must define a DRUMS page")
+    drum_components = tabs[page_indices["DRUMS"]]["componentDefinition"]["componentsData"]
+    for instance in drum_components:
+        component_data = instance.get("componentData", {})
+        name = component_data.get("name")
+        if name == "Bank":
+            _component_bounds(instance, "24 58 208 92")
+        elif isinstance(name, str) and name.startswith("Pad "):
+            try:
+                pad = int(name.rsplit(" ", 1)[1]) - 1
+            except ValueError as error:
+                raise ValueError(f"invalid DRUMS pad control name: {name}") from error
+            if not 0 <= pad < 12:
+                raise ValueError(f"invalid DRUMS pad control name: {name}")
+            component_data["type"] = pad_action_type
+            column, row = pad % 4, pad // 4
+            _component_bounds(
+                instance,
+                f"{24 + column * 307} {160 + row * 140} 298 115",
+            )
 
     sequence_components.append(_playhead_component(playhead_index))
     definition_entries[:] = [

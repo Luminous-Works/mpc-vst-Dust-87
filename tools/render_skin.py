@@ -15,12 +15,10 @@ PAGE_SIZE = (1280, 628)
 SCALE = 3
 ACCENTS = {
     "mix": ("#F5A623", "#22D3EE", "MASTER / OUTPUT"),
-    "kick": ("#F5A623", "#34D399", "KICK / TRANSIENT"),
-    "snare": ("#FB7185", "#F5A623", "SNARE / BODY"),
-    "toms": ("#34D399", "#22D3EE", "TOMS / PITCH"),
-    "perc": ("#22D3EE", "#A78BFA", "PERC / MOTION"),
-    "more": ("#A78BFA", "#FB7185", "GLOBAL / ROUTING"),
+    "drums": ("#F5A623", "#22D3EE", "4 BANKS / 48 PADS"),
+    "pad": ("#FB7185", "#A78BFA", "SELECTED PAD / VOICE"),
     "seq": ("#F5A623", "#22D3EE", "64-STEP / MPC SYNC"),
+    "browse": ("#22D3EE", "#A78BFA", "80 BUILT-IN GROOVES"),
     "seqctl": ("#F5A623", "#22D3EE", "SEQUENCER CONTROLS"),
 }
 SLOTS = [(23 + column * 320, 45 + row * 150) for row in range(4) for column in range(4)]
@@ -471,6 +469,71 @@ def save_sequence_toggle(path, active):
     image.resize((width, height), Image.Resampling.LANCZOS).save(path, optimize=True)
 
 
+def save_pad_button(path, active):
+    width, height = 278, 80
+    image = Image.new("RGBA", (width * SCALE, height * SCALE))
+    draw = ImageDraw.Draw(image)
+    if active:
+        outer = (129, 90, 29, 255)
+        edge = (255, 202, 99, 255)
+        top = (132, 91, 29, 255)
+        bottom = (47, 34, 17, 255)
+        accent = color("#F5A623", 255)
+    else:
+        outer = (74, 86, 98, 255)
+        edge = (190, 201, 211, 255)
+        top = (69, 81, 93, 255)
+        bottom = (25, 33, 42, 255)
+        accent = color("#A9B6C2", 220)
+
+    draw.rounded_rectangle(
+        (SCALE, SCALE, (width - 1) * SCALE, (height - 1) * SCALE),
+        radius=9 * SCALE,
+        fill=outer,
+        outline=edge,
+        width=SCALE,
+    )
+    face = vertical_gradient(
+        ((width - 6) * SCALE, (height - 6) * SCALE),
+        top,
+        bottom,
+    )
+    mask = Image.new("L", face.size)
+    ImageDraw.Draw(mask).rounded_rectangle(
+        (0, 0, face.width - 1, face.height - 1),
+        radius=7 * SCALE,
+        fill=255,
+    )
+    face.putalpha(mask)
+    image.alpha_composite(face, (3 * SCALE, 3 * SCALE))
+    draw = ImageDraw.Draw(image)
+    draw.line(
+        (12 * SCALE, 4 * SCALE, (width - 12) * SCALE, 4 * SCALE),
+        fill=(235, 241, 246, 220) if not active else (255, 226, 172, 245),
+        width=SCALE,
+    )
+    draw.ellipse(
+        (12 * SCALE, 17 * SCALE, 20 * SCALE, 25 * SCALE),
+        fill=accent,
+    )
+    draw.rounded_rectangle(
+        (12 * SCALE, (height - 13) * SCALE,
+         (width - 12) * SCALE, (height - 8) * SCALE),
+        radius=2 * SCALE,
+        fill=(8, 12, 17, 255),
+        outline=(97, 109, 121, 190),
+        width=SCALE,
+    )
+    if active:
+        draw.rounded_rectangle(
+            (14 * SCALE, (height - 12) * SCALE,
+             (width - 14) * SCALE, (height - 9) * SCALE),
+            radius=1 * SCALE,
+            fill=color("#F5A623", 235),
+        )
+    image.resize((width, height), Image.Resampling.LANCZOS).save(path, optimize=True)
+
+
 def save_sequence_playhead(path):
     width, height = 1227, 100
     strip = Image.new("RGBA", (width, height * 17), (0, 0, 0, 0))
@@ -642,6 +705,18 @@ def save_background(name, primary_hex, secondary_hex, descriptor, active_slots):
     image.convert("RGB").save(ASSETS / f"{name}-bg.png", optimize=True)
 
 
+def save_drum_background(primary_hex, secondary_hex, descriptor):
+    save_background("drums", primary_hex, secondary_hex, descriptor, [])
+    image = Image.open(ASSETS / "drums-bg.png").convert("RGBA")
+    beveled_panel(image, (24, 58, 232, 150), radius=8)
+    for row in range(3):
+        for column in range(4):
+            left = 24 + column * 307
+            top = 160 + row * 140
+            beveled_panel(image, (left, top, left + 298, top + 115), radius=9)
+    image.convert("RGB").save(ASSETS / "drums-bg.png", optimize=True)
+
+
 def main():
     ASSETS.mkdir(parents=True, exist_ok=True)
     save_knob(ASSETS / "knob_uni.png", "#F5A623")
@@ -652,6 +727,8 @@ def main():
     save_step_button(ASSETS / "seq_step_off.png", False)
     save_sequence_toggle(ASSETS / "seq_toggle_on.png", True)
     save_sequence_toggle(ASSETS / "seq_toggle_off.png", False)
+    save_pad_button(ASSETS / "pad_button_on.png", True)
+    save_pad_button(ASSETS / "pad_button_off.png", False)
     save_sequence_playhead(ASSETS / "seq_playhead.png")
     ui = json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))
     for page in ui["pages"]:
@@ -661,6 +738,9 @@ def main():
             save_pulse_ring(ASSETS / f"pulse_ring_{name}.png", primary)
         if name == "seq":
             save_sequence_background(primary, secondary, descriptor)
+            continue
+        if name == "drums":
+            save_drum_background(primary, secondary, descriptor)
             continue
         active_slots = [
             SLOTS[index]
