@@ -1,11 +1,18 @@
 import json
 import re
+import struct
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT
+sys.path.insert(0, str(ROOT))
+
+from tools.prepare_mpc_skin import prepare_skin
+
+
 DRUM_LABELS = [
     "Kick", "Sub", "Snare", "Crack", "Rim", "Clap", "CHat", "OHat",
     "LoTom", "MidTom", "HiTom", "Crash", "Ride", "CBell", "Clave",
@@ -14,6 +21,11 @@ DRUM_LABELS = [
 
 
 class ReleaseReadinessTests(unittest.TestCase):
+    def png_dimensions(self, path):
+        image = path.read_bytes()
+        self.assertEqual(image[:8], b"\x89PNG\r\n\x1a\n")
+        return struct.unpack(">II", image[16:24])
+
     def test_native_sdk_manifest_and_binary_identity(self):
         manifest = json.loads((PROJECT / "plugin.json").read_text(encoding="utf-8"))
         source = (PROJECT / "src" / "DUST87.cpp").read_text(encoding="utf-8")
@@ -44,6 +56,172 @@ class ReleaseReadinessTests(unittest.TestCase):
 
         self.assertEqual(referenced, expected)
         self.assertEqual(ui["qlinkGroups"], "rows")
+
+    def test_native_ui_uses_custom_brand_skin_assets(self):
+        ui = json.loads((PROJECT / "ui.json").read_text(encoding="utf-8"))
+        self.assertEqual(ui["kit"], "amber")
+        self.assertEqual(ui["style"]["accent"], "ffffb020")
+
+        backgrounds = []
+        for page in ui["pages"]:
+            background = page.get("background")
+            self.assertTrue(background, f"{page['name']} page is missing its designed background")
+            backgrounds.append(background)
+            self.assertEqual(self.png_dimensions(ROOT / "assets" / background), (1280, 628))
+
+        self.assertEqual(len(set(backgrounds)), len(ui["pages"]))
+        expected_assets = {
+            "knob_uni.png": (90, 90 * 127),
+            "knob_bi.png": (90, 90 * 127),
+            "fader_h_uni.png": (248, 36 * 127),
+            "seg4_on.png": (58, 40),
+            "seg4_off.png": (58, 40),
+        }
+        for filename, dimensions in expected_assets.items():
+            with self.subTest(asset=filename):
+                self.assertEqual(self.png_dimensions(ROOT / "assets" / filename), dimensions)
+
+    def test_native_knob_rings_follow_the_midi_velocity_pulse(self):
+        source = (PROJECT / "src" / "DUST87.cpp").read_text(encoding="utf-8")
+        self.assertIn('"beat_pulse"', source)
+        self.assertIn("beatPulseParam.automatable = false", source)
+        self.assertIn("void saveExtraState(std::vector<uint8_t>& out) override", source)
+
+        ui = json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))
+        tui = json.loads((ROOT / "skins" / "TUI.json").read_text(encoding="utf-8"))
+        page_data = tui["pageData"]
+        definitions = {
+            entry["key"]: entry["value"]
+            for entry in page_data["componentDefinitions"]["localComponentDefinitions"]
+        }
+        pulse_images = set()
+        for page_index, tab in enumerate(page_data["tabs"]):
+            knobs = [
+                child
+                for child in tab["componentDefinition"]["componentsData"]
+                if child["componentData"]["type"].startswith(("knobUniPulse_", "knobBiPulse_"))
+            ]
+            expected_knobs = sum(
+                control.get("widget") == "knob"
+                for control in ui["pages"][page_index]["controls"]
+                if isinstance(control, dict)
+            )
+            self.assertEqual(len(knobs), expected_knobs)
+            for knob in knobs:
+                remaps = {
+                    item["key"]: item["value"]
+                    for item in knob["handle remapping"]["map"]
+                }
+                self.assertEqual(remaps["Pulse"], "Parameter 60")
+                definition = definitions[knob["componentData"]["type"]]
+                pulse = next(
+                    child for child in definition["componentsData"]
+                    if child["componentData"]["type"] == "Image"
+                )
+                image_data = pulse["componentData"]["data"]
+                self.assertEqual(image_data["imageType"], "FilmStrip")
+                self.assertEqual(image_data["handleName"], "Pulse")
+                self.assertEqual(image_data["numFrames"], 127)
+                pulse_images.add(image_data["image"])
+
+        self.assertTrue(pulse_images)
+        for filename in pulse_images:
+            with self.subTest(asset=filename):
+                self.assertEqual(
+                    self.png_dimensions(ROOT / "assets" / filename),
+                    (106, 106 * 127),
+                )
+
+    def test_skin_preparation_adds_page_specific_pulse_overlays(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            generated = temp / "generated"
+            generated.mkdir()
+            output = temp / "skins"
+            params_path = temp / "params.json"
+            base_knob = {
+                "componentsData": [
+                    {"componentData": {"type": "Focus"}},
+                    {"componentData": {"type": "Knob"}},
+                ]
+            }
+            tabs = []
+            for page in json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))["pages"]:
+                tabs.append({
+                    "componentDefinition": {
+                        "componentsData": [{
+                            "componentData": {"type": "knobUni"},
+                            "handle remapping": {"map": [{"key": "Data", "value": "Parameter 3"}]},
+                        }]
+                    }
+                })
+            tui = {
+                "pageData": {
+                    "componentDefinitions": {
+                        "localComponentDefinitions": [
+                            {"key": "knobUni", "value": base_knob},
+                            {"key": "knobBi", "value": base_knob},
+                        ]
+                    },
+                    "tabs": tabs,
+                }
+            }
+            (generated / "TUI.json").write_text(json.dumps(tui), encoding="utf-8")
+            (generated / "Q-Links.json").write_text('{"generated": true}', encoding="utf-8")
+            params_path.write_text(json.dumps({
+                "params": [
+                    {"index": 60, "name": "Beat Pulse", "automatable": False}
+                ]
+            }), encoding="utf-8")
+
+            prepare_skin(generated, params_path, output)
+
+            result = json.loads((output / "TUI.json").read_text(encoding="utf-8"))
+            page_data = result["pageData"]
+            definitions = {
+                entry["key"]: entry["value"]
+                for entry in page_data["componentDefinitions"]["localComponentDefinitions"]
+            }
+            for page, tab in zip(
+                json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))["pages"],
+                page_data["tabs"],
+            ):
+                instance = tab["componentDefinition"]["componentsData"][0]
+                page_key = f"knobUniPulse_{page['name'].lower()}"
+                self.assertEqual(instance["componentData"]["type"], page_key)
+                self.assertIn(
+                    {"key": "Pulse", "value": "Parameter 60"},
+                    instance["handle remapping"]["map"],
+                )
+                pulse = next(
+                    child for child in definitions[page_key]["componentsData"]
+                    if child["componentData"]["type"] == "Image"
+                )
+                self.assertEqual(
+                    pulse["componentData"]["data"]["image"],
+                    f"pulse_ring_{page['name'].lower()}.png",
+                )
+            self.assertEqual(
+                (output / "Q-Links.json").read_text(encoding="utf-8"),
+                '{"generated": true}',
+            )
+
+    def test_skin_preparation_rejects_an_automatable_pulse_parameter(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            generated = temp / "generated"
+            generated.mkdir()
+            (generated / "TUI.json").write_text('{"pageData": {}}', encoding="utf-8")
+            (generated / "Q-Links.json").write_text("{}", encoding="utf-8")
+            params_path = temp / "params.json"
+            params_path.write_text(json.dumps({
+                "params": [
+                    {"index": 60, "name": "Beat Pulse", "automatable": True}
+                ]
+            }), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "must be non-automatable"):
+                prepare_skin(generated, params_path, temp / "skins")
 
     def test_readme_shows_generated_ui_and_states_device_capture_status(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
