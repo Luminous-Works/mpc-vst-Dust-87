@@ -14,6 +14,7 @@
 #include "dsp/svf.h"
 #include "sequencer_clock.h"
 #include "groove_library.h"
+#include "pad_midi.h"
 
 #include <array>
 #include <atomic>
@@ -65,12 +66,16 @@ constexpr int kPadLevel = kPadDecay + 1;
 constexpr int kPadMute = kPadLevel + 1;
 constexpr int kPadSolo = kPadMute + 1;
 constexpr int kPadChoke = kPadSolo + 1;
-constexpr int kPadRandomize = kPadChoke + 1;
+constexpr int kPadMidiChannel = kPadChoke + 1;
+constexpr int kPadMidiNote = kPadMidiChannel + 1;
+constexpr int kPadMidiRouting = kPadMidiNote + 1;
+constexpr int kPadAudition = kPadMidiRouting + 1;
+constexpr int kPadRandomize = kPadAudition + 1;
 constexpr int kPadReset = kPadRandomize + 1;
 constexpr int kTotalParams = kPadReset + 1;
-constexpr int kPadCount = 48;
 constexpr uint8_t kDefaultStepVelocity = 112;
-constexpr int kSequenceStateVersion = 2;
+constexpr int kPadAuditionVelocity = 112;
+constexpr uint8_t kPluginStateVersion = 3;
 
 constexpr int kMaster = 0;
 constexpr int kVoiceLayers = 2;
@@ -599,6 +604,23 @@ public:
             "pad_choke", "Choke Group", {"OFF", "GRP 1", "GRP 2", "GRP 3", "GRP 4"});
         padChoke.automatable = false;
         addParam(padChoke);
+        mpc::Param padMidiChannel = mpc::floatParam(
+            "pad_midi_channel", "MIDI Channel", 1.0f, 16.0f, 1.0f, "", 0);
+        padMidiChannel.automatable = false;
+        addParam(padMidiChannel);
+        mpc::Param padMidiNote = mpc::floatParam(
+            "pad_midi_note", "MIDI Note", 0.0f, 127.0f, 36.0f, "", 0);
+        padMidiNote.automatable = false;
+        addParam(padMidiNote);
+        mpc::Param padMidiRouting = mpc::choiceParam(
+            "pad_midi_routing", "MIDI Routing",
+            {"PER-VOICE CH", "COMBO BY NOTE"});
+        padMidiRouting.automatable = false;
+        addParam(padMidiRouting);
+        mpc::Param auditionPad = mpc::boolParam(
+            "pad_audition", "Audition Pad", false);
+        auditionPad.automatable = false;
+        addParam(auditionPad);
         mpc::Param randomizePad = mpc::boolParam(
             "pad_randomize", "Randomize Voice", false);
         randomizePad.automatable = false;
@@ -622,6 +644,12 @@ public:
             padMutes_[pad].store(false, std::memory_order_relaxed);
             padSolos_[pad].store(false, std::memory_order_relaxed);
             padChokes_[pad].store(defaultPadChoke(pad), std::memory_order_relaxed);
+            padMidiChannels_[pad].store(
+                static_cast<uint8_t>(defaultPadMidiChannel(pad)),
+                std::memory_order_relaxed);
+            padMidiNotes_[pad].store(
+                static_cast<uint8_t>(defaultPadMidiNote(pad)),
+                std::memory_order_relaxed);
         }
         syncPadEditor();
 
@@ -705,6 +733,28 @@ public:
                 std::memory_order_relaxed);
             return;
         }
+        if (index == kPadMidiChannel)
+        {
+            padMidiChannels_[static_cast<size_t>(selectedPad)].store(
+                static_cast<uint8_t>(mpc::clamp(
+                    static_cast<int>(std::lround(plainValue)), 1, 16)),
+                std::memory_order_relaxed);
+            return;
+        }
+        if (index == kPadMidiNote)
+        {
+            padMidiNotes_[static_cast<size_t>(selectedPad)].store(
+                static_cast<uint8_t>(mpc::clamp(
+                    static_cast<int>(std::lround(plainValue)), 0, 127)),
+                std::memory_order_relaxed);
+            return;
+        }
+        if (index == kPadAudition && plainValue >= 0.5f)
+        {
+            pendingAuditionPad_.store(selectedPad, std::memory_order_relaxed);
+            pendingPadAudition_.store(true, std::memory_order_release);
+            return;
+        }
         if (index == kPadRandomize && plainValue >= 0.5f)
         {
             randomizeSelectedPad();
@@ -753,6 +803,8 @@ public:
                         std::memory_order_relaxed);
             if (stagedPadStatePresent_.exchange(false, std::memory_order_acquire))
             {
+                const bool stagedMidiAssignments =
+                    stagedPadMidiStatePresent_.exchange(false, std::memory_order_acquire);
                 for (int pad = 0; pad < kPadCount; ++pad)
                 {
                     const auto& staged = stagedPadState_[static_cast<size_t>(pad)];
@@ -786,6 +838,20 @@ public:
                                        staged[6].load(std::memory_order_relaxed)),
                                    0, 4),
                         std::memory_order_relaxed);
+                    padMidiChannels_[static_cast<size_t>(pad)].store(
+                        stagedMidiAssignments
+                            ? mpc::clamp(static_cast<int>(
+                                             staged[7].load(std::memory_order_relaxed)),
+                                         1, 16)
+                            : defaultPadMidiChannel(pad),
+                        std::memory_order_relaxed);
+                    padMidiNotes_[static_cast<size_t>(pad)].store(
+                        stagedMidiAssignments
+                            ? mpc::clamp(static_cast<int>(
+                                             staged[8].load(std::memory_order_relaxed)),
+                                         0, 127)
+                            : defaultPadMidiNote(pad),
+                        std::memory_order_relaxed);
                 }
                 syncPadEditor();
             }
@@ -805,6 +871,8 @@ public:
         set(kGrooveLoad, 0.0f);
         set(kPadRandomize, 0.0f);
         set(kPadReset, 0.0f);
+        set(kPadAudition, 0.0f);
+        pendingPadAudition_.store(false, std::memory_order_relaxed);
         set(kSeqPosition, kSequenceStepsPerBar);
         syncSequenceSteps();
     }
@@ -812,8 +880,8 @@ public:
     void saveExtraState(std::vector<uint8_t>& out) override
     {
         out.clear();
-        out.reserve(1 + kNumDrums * kSequenceSteps + kPadCount * 7);
-        out.push_back(kSequenceStateVersion);
+        out.reserve(1 + kNumDrums * kSequenceSteps + kPadCount * 9);
+        out.push_back(kPluginStateVersion);
         for (int drum = 0; drum < kNumDrums; ++drum)
             for (int step = 0; step < kSequenceSteps; ++step)
                 out.push_back(sequencePattern_[drum][step].load(std::memory_order_relaxed));
@@ -830,6 +898,8 @@ public:
             out.push_back(padMutes_[index].load(std::memory_order_relaxed) ? 1 : 0);
             out.push_back(padSolos_[index].load(std::memory_order_relaxed) ? 1 : 0);
             out.push_back(static_cast<uint8_t>(padChokes_[index].load(std::memory_order_relaxed)));
+            out.push_back(padMidiChannels_[index].load(std::memory_order_relaxed));
+            out.push_back(padMidiNotes_[index].load(std::memory_order_relaxed));
         }
         // The beat ring is transient UI state; clear it when a project is saved.
         set(kBeatPulse, 0.0f);
@@ -838,16 +908,18 @@ public:
     void loadExtraState(const uint8_t* data, size_t size) override
     {
         const size_t sequenceStateSize = 1 + kNumDrums * kSequenceSteps;
-        const size_t currentStateSize = sequenceStateSize + kPadCount * 7;
+        const size_t previousPadStateSize = sequenceStateSize + kPadCount * 7;
+        const size_t currentStateSize = sequenceStateSize + kPadCount * 9;
         if (data == nullptr)
         {
             mpc::log("DUST '87: unsupported plug-in state; keeping current patterns and pads");
             return;
         }
         const bool legacyState = size == sequenceStateSize && data[0] == 1;
+        const bool previousPadState = size == previousPadStateSize && data[0] == 2;
         const bool currentState = size == currentStateSize &&
-                                  data[0] == kSequenceStateVersion;
-        if (!legacyState && !currentState)
+                                  data[0] == kPluginStateVersion;
+        if (!legacyState && !previousPadState && !currentState)
         {
             mpc::log("DUST '87: unsupported plug-in state; keeping current patterns and pads");
             return;
@@ -857,14 +929,26 @@ public:
         for (int drum = 0; drum < kNumDrums; ++drum)
             for (int step = 0; step < kSequenceSteps; ++step)
                 stagedSequencePattern_[drum][step].store(data[offset++], std::memory_order_relaxed);
-        if (currentState)
+        if (previousPadState || currentState)
             for (int pad = 0; pad < kPadCount; ++pad)
             {
                 auto& staged = stagedPadState_[static_cast<size_t>(pad)];
-                for (auto& value : staged)
-                    value.store(data[offset++], std::memory_order_relaxed);
+                for (size_t field = 0; field < 7; ++field)
+                    staged[field].store(data[offset++], std::memory_order_relaxed);
+                if (currentState)
+                {
+                    for (size_t field = 7; field < staged.size(); ++field)
+                        staged[field].store(data[offset++], std::memory_order_relaxed);
+                }
+                else
+                {
+                    staged[7].store(0, std::memory_order_relaxed);
+                    staged[8].store(0, std::memory_order_relaxed);
+                }
             }
-        stagedPadStatePresent_.store(currentState, std::memory_order_relaxed);
+        stagedPadMidiStatePresent_.store(currentState, std::memory_order_relaxed);
+        stagedPadStatePresent_.store(
+            previousPadState || currentState, std::memory_order_relaxed);
         sequenceStatePending_.store(true, std::memory_order_release);
     }
 
@@ -964,6 +1048,10 @@ private:
         set(kPadMute, padMutes_[pad].load(std::memory_order_relaxed) ? 1.0f : 0.0f);
         set(kPadSolo, padSolos_[pad].load(std::memory_order_relaxed) ? 1.0f : 0.0f);
         set(kPadChoke, static_cast<float>(padChokes_[pad].load(std::memory_order_relaxed)));
+        set(kPadMidiChannel,
+            static_cast<float>(padMidiChannels_[pad].load(std::memory_order_relaxed)));
+        set(kPadMidiNote,
+            static_cast<float>(padMidiNotes_[pad].load(std::memory_order_relaxed)));
     }
 
     void randomizeSelectedPad()
@@ -1002,6 +1090,10 @@ private:
         padMutes_[index].store(false, std::memory_order_relaxed);
         padSolos_[index].store(false, std::memory_order_relaxed);
         padChokes_[index].store(defaultPadChoke(pad), std::memory_order_relaxed);
+        padMidiChannels_[index].store(
+            static_cast<uint8_t>(defaultPadMidiChannel(pad)), std::memory_order_relaxed);
+        padMidiNotes_[index].store(
+            static_cast<uint8_t>(defaultPadMidiNote(pad)), std::memory_order_relaxed);
         syncPadEditor();
     }
 
@@ -1076,9 +1168,15 @@ private:
     {
         if (event.isNoteOn())
         {
-            if (event.note() >= 36 && event.note() < 36 + kPadCount)
-                triggerPad(event.note() - 36, event.velocity());
-            else
+            const auto routingMode = static_cast<PadMidiRoutingMode>(
+                mpc::clamp(getInt(kPadMidiRouting), 0, 1));
+            const int pad = findPadForMidi(
+                event.note(), event.channel() + 1, routingMode,
+                padMidiChannels_, padMidiNotes_);
+            if (pad >= 0)
+                triggerPad(pad, event.velocity());
+            else if (routingMode == PadMidiRoutingMode::ComboByNote ||
+                     (event.note() < 36 || event.note() >= 36 + kPadCount))
             {
                 const int drum = ((event.note() - 36) % kNumDrums + kNumDrums) % kNumDrums;
                 triggerDrum(drum, event.velocity(), tune, decay, level);
@@ -1250,6 +1348,12 @@ private:
             }
         if (getBool(kPadRandomize)) set(kPadRandomize, 0.0f);
         if (getBool(kPadReset)) set(kPadReset, 0.0f);
+        if (pendingPadAudition_.exchange(false, std::memory_order_acquire))
+        {
+            triggerPad(pendingAuditionPad_.load(std::memory_order_relaxed),
+                       kPadAuditionVelocity);
+            set(kPadAudition, 0.0f);
+        }
     }
 
     void randomizeSequence()
@@ -1353,10 +1457,15 @@ private:
     std::array<std::atomic<bool>, kPadCount> padMutes_{};
     std::array<std::atomic<bool>, kPadCount> padSolos_{};
     std::array<std::atomic<int>, kPadCount> padChokes_{};
-    std::array<std::array<std::atomic<uint8_t>, 7>, kPadCount> stagedPadState_{};
+    std::array<std::atomic<uint8_t>, kPadCount> padMidiChannels_{};
+    std::array<std::atomic<uint8_t>, kPadCount> padMidiNotes_{};
+    std::array<std::array<std::atomic<uint8_t>, 9>, kPadCount> stagedPadState_{};
     std::atomic<bool> stagedPadStatePresent_{false};
+    std::atomic<bool> stagedPadMidiStatePresent_{false};
     std::array<std::atomic<bool>, 12> pendingPadHits_{};
     std::array<std::atomic<int>, 12> pendingPadIndices_{};
+    std::atomic<bool> pendingPadAudition_{false};
+    std::atomic<int> pendingAuditionPad_{0};
     std::atomic<int> selectedPad_{0};
     std::atomic<uint32_t> padRandomCounter_{1};
     uint32_t sequenceRandomState_ = 0x87d057u;

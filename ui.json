@@ -45,9 +45,13 @@
         { "param": "Mute Voice", "widget": "switch" },
         { "param": "Solo Voice", "widget": "switch" },
         { "param": "Choke Group", "widget": "knob", "overlay": "menu" },
+        { "param": "MIDI Channel", "widget": "knob" },
+        { "param": "MIDI Note", "widget": "knob" },
+        { "param": "MIDI Routing", "widget": "knob", "overlay": "menu" },
+        { "param": "Audition Pad", "widget": "switch" },
         { "param": "Randomize Voice", "widget": "switch" },
         { "param": "Reset Voice", "widget": "switch" },
-        "empty", "empty", "empty", "empty", "empty", "empty"
+        "empty", "empty"
       ]
     },
     {

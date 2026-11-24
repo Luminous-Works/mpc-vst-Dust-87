@@ -61,8 +61,8 @@ class ReleaseReadinessTests(unittest.TestCase):
              if isinstance(control, dict)],
             [
                 "Selected Pad", "Voice Model", "Pad Tune", "Pad Decay", "Pad Level",
-                "Mute Voice", "Solo Voice", "Choke Group", "Randomize Voice",
-                "Reset Voice",
+                "Mute Voice", "Solo Voice", "Choke Group", "MIDI Channel", "MIDI Note",
+                "MIDI Routing", "Audition Pad", "Randomize Voice", "Reset Voice",
             ],
         )
         self.assertEqual(
@@ -71,6 +71,26 @@ class ReleaseReadinessTests(unittest.TestCase):
             ["Groove", "Load Groove"],
         )
         self.assertFalse({"KICK", "SNARE", "TOMS", "PERC"} & set(pages))
+
+    def test_native_pad_midi_routing_matches_original_pad_defaults(self):
+        compiler = shutil.which("g++")
+        if compiler is None:
+            self.skipTest("g++ is not installed")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            executable = Path(temp_dir) / "pad-midi-test.exe"
+            subprocess.run(
+                [
+                    compiler,
+                    "-std=c++17",
+                    str(ROOT / "tests" / "pad_midi_test.cpp"),
+                    "-o",
+                    str(executable),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run([str(executable)], check=True, capture_output=True, text=True)
 
     def test_native_sequence_clock_respects_swing_and_four_bar_loop(self):
         compiler = shutil.which("g++")
@@ -132,8 +152,9 @@ class ReleaseReadinessTests(unittest.TestCase):
         expected = {
             "Master", "Bit Depth", "Sample Rate", "Drive", "Plate Mix", "Plate Decay",
             "Bank", "Selected Pad", "Voice Model", "Pad Tune", "Pad Decay", "Pad Level",
-            "Mute Voice", "Solo Voice", "Choke Group", "Randomize Voice", "Reset Voice",
-            "Groove", "Load Groove",
+            "Mute Voice", "Solo Voice", "Choke Group", "MIDI Channel", "MIDI Note",
+            "MIDI Routing", "Audition Pad", "Randomize Voice", "Reset Voice", "Groove",
+            "Load Groove",
         }
         expected.update({f"Pad {pad:02d}" for pad in range(1, 13)})
         expected.update({f"Step {step:02d}" for step in range(1, 17)})

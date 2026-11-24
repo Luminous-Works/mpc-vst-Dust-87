@@ -8,8 +8,8 @@
 
 ## What it is
 
-- **18 procedural percussion voices**, with direct MIDI note selection and an out-of-range voice fallback.
-- **Four banks of 12 pads**, with MIDI notes 36-83 selecting the 48 pad assignments. Each pad can select a voice model and adjust Tune, Decay, Level, Mute, Solo, and Choke Group.
+- **18 procedural percussion voices**, with per-voice MIDI channel or note routing and an out-of-range voice fallback.
+- **Four banks of 12 pads**, each with editable MIDI channel (1-16), MIDI note (0-127), voice model, Tune, Decay, Level, Mute, Solo, and Choke Group, plus pad audition. Factory MIDI assignments follow the original design: notes 36-83 and channels 1-12 repeated across banks.
 - **Per-voice controls:** Tune, Decay, and Level.
 - **Global mix controls:** Master, Bit Depth, Sample Rate, Drive, Plate Mix, and Plate Decay.
 - **8 built-in factory programs:** Factory 87, Tape Dust, Sub Heavy, Lo-Fi Break, Crate Snare, Dry Machine, Dark Plate, and Bright 12.
@@ -28,6 +28,8 @@ This is a generated UI preview, not a hardware capture. RND SEQ uses the origina
 
 The native skin presents five visible pages: MIX, DRUMS, PAD, SEQ, and BROWSE. DRUMS keeps the original four-bank 4×3 pad-grid interaction together instead of splitting drum families into separate pages. PAD edits the currently selected pad; BROWSE is a separate page and is not embedded in SEQ. The SDK skin has no web-style long-press context sheet, so pad editing is presented on PAD rather than in a browser overlay. A hidden SEQCTL helper page supplies sequencer controls and is merged into SEQ during skin preparation.
 
+The PAD page preserves the original Pad Context Sheet's channel, note, routing, and audition functions. Per-Voice Channel is the default routing mode and uses the first pad assigned to an incoming channel; Combo by Note routes matching notes directly to their pad assignments. The two routing modes intentionally follow the original implementation, including its repeated factory channel assignments across banks.
+
 DUST supplies its own brushed-aluminum faceplate, recessed dark display, beveled control wells, machined-metal knobs and faders, and segmented-button artwork. Every sound knob also has a page-accented ring that follows a hidden, non-automatable MIDI-velocity pulse; the colored dust particles remain part of each page. The previews below are composed from those assets and the `ui.json` control layout, not captured from an MPC.
 
 ![Generated MIX-page layout preview](docs/screenshots/mix-layout.png)
@@ -36,7 +38,7 @@ DUST supplies its own brushed-aluminum faceplate, recessed dark display, beveled
 |------|----------|
 | MIX | Master, Bit Depth, Sample Rate, Drive, Plate Mix, Plate Decay |
 | DRUMS | Bank selection and 12 pads from the active bank |
-| PAD | Selected pad, voice model, Tune, Decay, Level, Mute, Solo, Choke Group, Randomize, Reset |
+| PAD | Selected pad, voice model, Tune, Decay, Level, Mute, Solo, Choke Group, MIDI Channel, MIDI Note, MIDI Routing, Audition Pad, Randomize, Reset |
 | SEQ | 64-step editor, voice lane, bar selection, swing, randomize, and clear |
 | BROWSE | Selection and load action for 80 built-in grooves |
 
