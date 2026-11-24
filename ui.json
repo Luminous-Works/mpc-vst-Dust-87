@@ -12,13 +12,13 @@
         { "param": "Drive", "widget": "knob" },
         { "param": "Plate Mix", "widget": "fader" },
         { "param": "Plate Decay", "widget": "knob" },
+        { "param": "Metal Tune", "widget": "knob" },
+        { "param": "Metal Decay", "widget": "fader" },
+        { "param": "Metal Level", "widget": "fader" },
         "empty",
-        "empty",
-        "empty",
-        "empty",
-        "empty",
-        "empty",
-        "empty",
+        { "param": "Zap Tune", "widget": "knob" },
+        { "param": "Zap Decay", "widget": "fader" },
+        { "param": "Zap Level", "widget": "fader" },
         "empty",
         "empty",
         "empty"
@@ -65,13 +65,32 @@
       ]
     },
     {
-      "name": "MORE",
-      "background": "more-bg.png",
+      "name": "SEQ",
+      "background": "seq-bg.png",
       "controls": [
-        { "param": "Metal Tune", "widget": "knob" }, { "param": "Metal Decay", "widget": "fader" }, { "param": "Metal Level", "widget": "fader" }, "empty",
-        { "param": "Zap Tune", "widget": "knob" }, { "param": "Zap Decay", "widget": "fader" }, { "param": "Zap Level", "widget": "fader" }, "empty",
+        { "param": "Step 01", "widget": "switch" }, { "param": "Step 02", "widget": "switch" },
+        { "param": "Step 03", "widget": "switch" }, { "param": "Step 04", "widget": "switch" },
+        { "param": "Step 05", "widget": "switch" }, { "param": "Step 06", "widget": "switch" },
+        { "param": "Step 07", "widget": "switch" }, { "param": "Step 08", "widget": "switch" },
+        { "param": "Step 09", "widget": "switch" }, { "param": "Step 10", "widget": "switch" },
+        { "param": "Step 11", "widget": "switch" }, { "param": "Step 12", "widget": "switch" },
+        { "param": "Step 13", "widget": "switch" }, { "param": "Step 14", "widget": "switch" },
+        { "param": "Step 15", "widget": "switch" }, { "param": "Step 16", "widget": "switch" }
+      ]
+    },
+    {
+      "name": "SEQCTL",
+      "background": "seqctl-bg.png",
+      "controls": [
+        { "param": "Lane", "widget": "knob", "overlay": "menu" },
+        { "param": "Bar", "widget": "switch" },
+        { "param": "Seq", "widget": "switch" },
+        { "param": "Swing", "widget": "fader" },
+        { "param": "Rnd Seq", "widget": "switch" },
+        { "param": "Clear", "widget": "switch" },
         "empty", "empty", "empty", "empty",
-        "empty", "empty", "empty", "empty"
+        "empty", "empty", "empty", "empty",
+        "empty", "empty"
       ]
     }
   ],

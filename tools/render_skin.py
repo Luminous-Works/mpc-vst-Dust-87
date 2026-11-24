@@ -20,6 +20,8 @@ ACCENTS = {
     "toms": ("#34D399", "#22D3EE", "TOMS / PITCH"),
     "perc": ("#22D3EE", "#A78BFA", "PERC / MOTION"),
     "more": ("#A78BFA", "#FB7185", "GLOBAL / ROUTING"),
+    "seq": ("#F5A623", "#22D3EE", "64-STEP / MPC SYNC"),
+    "seqctl": ("#F5A623", "#22D3EE", "SEQUENCER CONTROLS"),
 }
 SLOTS = [(23 + column * 320, 45 + row * 150) for row in range(4) for column in range(4)]
 PARTICLE_COLORS = ("#ffb020", "#22d3ee", "#fb7185", "#4ade80", "#a78bfa")
@@ -376,6 +378,168 @@ def save_segments():
         image.resize((58, 40), Image.Resampling.LANCZOS).save(ASSETS / filename)
 
 
+def save_step_button(path, active):
+    width, height = 54, 52
+    image = Image.new("RGBA", (width * SCALE, height * SCALE))
+    draw = ImageDraw.Draw(image)
+    if active:
+        draw.rounded_rectangle(
+            (2 * SCALE, 3 * SCALE, (width - 2) * SCALE, (height - 1) * SCALE),
+            radius=8 * SCALE,
+            fill=(92, 63, 18, 255),
+            outline=color("#FFC04D", 255),
+            width=2 * SCALE,
+        )
+        fill = vertical_gradient(
+            ((width - 8) * SCALE, (height - 8) * SCALE),
+            (165, 111, 29, 255),
+            (75, 51, 15, 255),
+        )
+        accent = color("#FFD27A", 255)
+    else:
+        draw.rounded_rectangle(
+            (2 * SCALE, 3 * SCALE, (width - 2) * SCALE, (height - 1) * SCALE),
+            radius=8 * SCALE,
+            fill=(29, 38, 48, 255),
+            outline=(141, 155, 169, 255),
+            width=2 * SCALE,
+        )
+        fill = vertical_gradient(
+            ((width - 8) * SCALE, (height - 8) * SCALE),
+            (72, 83, 95, 255),
+            (29, 38, 48, 255),
+        )
+        accent = (188, 201, 213, 230)
+
+    mask = Image.new("L", fill.size)
+    ImageDraw.Draw(mask).rounded_rectangle(
+        (0, 0, fill.width - 1, fill.height - 1),
+        radius=6 * SCALE,
+        fill=255,
+    )
+    fill.putalpha(mask)
+    image.alpha_composite(fill, (4 * SCALE, 4 * SCALE))
+    draw = ImageDraw.Draw(image)
+    draw.line(
+        (9 * SCALE, 6 * SCALE, (width - 9) * SCALE, 6 * SCALE),
+        fill=accent,
+        width=SCALE,
+    )
+    if active:
+        glow = Image.new("RGBA", image.size)
+        ImageDraw.Draw(glow).rounded_rectangle(
+            (3 * SCALE, 4 * SCALE, (width - 3) * SCALE, (height - 2) * SCALE),
+            radius=8 * SCALE,
+            outline=color("#F5A623", 145),
+            width=3 * SCALE,
+        )
+        image.alpha_composite(glow.filter(ImageFilter.GaussianBlur(4 * SCALE)))
+    image.resize((width, height), Image.Resampling.LANCZOS).save(path, optimize=True)
+
+
+def save_sequence_toggle(path, active):
+    width, height = 52, 36
+    image = Image.new("RGBA", (width * SCALE, height * SCALE))
+    draw = ImageDraw.Draw(image)
+    outline = color("#F5A623" if active else "#A9B6C2")
+    fill_top = (132, 91, 29, 255) if active else (80, 91, 102, 255)
+    fill_bottom = (53, 38, 18, 255) if active else (30, 39, 49, 255)
+    draw.rounded_rectangle(
+        (SCALE, SCALE, (width - 1) * SCALE, (height - 1) * SCALE),
+        radius=10 * SCALE,
+        fill=(26, 34, 43, 255),
+        outline=outline,
+        width=2 * SCALE,
+    )
+    fill = vertical_gradient(((width - 4) * SCALE, (height - 4) * SCALE), fill_top, fill_bottom)
+    mask = Image.new("L", fill.size)
+    ImageDraw.Draw(mask).rounded_rectangle(
+        (0, 0, fill.width - 1, fill.height - 1),
+        radius=8 * SCALE,
+        fill=255,
+    )
+    fill.putalpha(mask)
+    image.alpha_composite(fill, (2 * SCALE, 2 * SCALE))
+    center_x = (width - 16 if active else 16) * SCALE
+    draw = ImageDraw.Draw(image)
+    draw.ellipse(
+        (center_x - 8 * SCALE, 10 * SCALE, center_x + 8 * SCALE, 26 * SCALE),
+        fill=(229, 236, 242, 255),
+        outline=(255, 255, 255, 255),
+        width=SCALE,
+    )
+    image.resize((width, height), Image.Resampling.LANCZOS).save(path, optimize=True)
+
+
+def save_sequence_playhead(path):
+    width, height = 1227, 100
+    strip = Image.new("RGBA", (width, height * 17), (0, 0, 0, 0))
+    for frame in range(16):
+        overlay = Image.new("RGBA", (width * SCALE, height * SCALE))
+        glow = Image.new("RGBA", overlay.size)
+        left = (frame * 77 + 2) * SCALE
+        right = (frame * 77 + 70) * SCALE
+        ImageDraw.Draw(glow).rounded_rectangle(
+            (left, 2 * SCALE, right, (height - 2) * SCALE),
+            radius=7 * SCALE,
+            outline=color("#FFC04D", 200),
+            width=3 * SCALE,
+        )
+        overlay.alpha_composite(glow.filter(ImageFilter.GaussianBlur(5 * SCALE)))
+        ImageDraw.Draw(overlay).rounded_rectangle(
+            (left, 2 * SCALE, right, (height - 2) * SCALE),
+            radius=7 * SCALE,
+            outline=color("#FFD27A", 245),
+            width=2 * SCALE,
+        )
+        strip.paste(overlay.resize((width, height), Image.Resampling.LANCZOS), (0, frame * height))
+    strip.save(path, format="PNG", optimize=True)
+
+
+def save_sequence_background(primary_hex, secondary_hex, descriptor):
+    save_background("seq", primary_hex, secondary_hex, descriptor, [])
+    image = Image.open(ASSETS / "seq-bg.png").convert("RGBA")
+    controls = [
+        (24, 72, 218, 181),
+        (228, 72, 476, 181),
+        (486, 72, 586, 181),
+        (596, 72, 844, 181),
+        (854, 72, 964, 181),
+        (974, 72, 1084, 181),
+        (1094, 72, 1256, 181),
+    ]
+    for box in controls:
+        beveled_panel(image, box, radius=8)
+
+    step_left = 26
+    step_top = 280
+    for step in range(16):
+        x = step_left + step * 77
+        beveled_panel(image, (x, step_top, x + 72, step_top + 100), radius=8)
+        if step % 4 == 0:
+            ImageDraw.Draw(image).line(
+                (x + 4, step_top + 4, x + 20, step_top + 4),
+                fill=color(primary_hex, 220),
+                width=2,
+            )
+
+    draw = ImageDraw.Draw(image)
+    draw.text(
+        (26, 210),
+        "64 STEPS  /  FOUR BARS  /  18 DRUM LANES",
+        font=font(12, bold=True),
+        fill=(191, 203, 214, 240),
+    )
+    draw.text(
+        (1086, 105),
+        "MPC\nTRANSPORT\nSYNC",
+        font=font(12, bold=True),
+        fill=color(primary_hex, 255),
+        spacing=4,
+    )
+    image.convert("RGB").save(ASSETS / "seq-bg.png", optimize=True)
+
+
 def save_background(name, primary_hex, secondary_hex, descriptor, active_slots):
     image = vertical_gradient(PAGE_SIZE, (115, 125, 135, 255), (41, 49, 58, 255))
     grain = Image.new("RGBA", PAGE_SIZE)
@@ -484,11 +648,20 @@ def main():
     save_knob(ASSETS / "knob_bi.png", "#22D3EE", bipolar=True)
     save_fader(ASSETS / "fader_h_uni.png", "#F5A623")
     save_segments()
+    save_step_button(ASSETS / "seq_step_on.png", True)
+    save_step_button(ASSETS / "seq_step_off.png", False)
+    save_sequence_toggle(ASSETS / "seq_toggle_on.png", True)
+    save_sequence_toggle(ASSETS / "seq_toggle_off.png", False)
+    save_sequence_playhead(ASSETS / "seq_playhead.png")
     ui = json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))
     for page in ui["pages"]:
         name = page["name"].lower()
         primary, secondary, descriptor = ACCENTS[name]
-        save_pulse_ring(ASSETS / f"pulse_ring_{name}.png", primary)
+        if name not in ("seq", "seqctl"):
+            save_pulse_ring(ASSETS / f"pulse_ring_{name}.png", primary)
+        if name == "seq":
+            save_sequence_background(primary, secondary, descriptor)
+            continue
         active_slots = [
             SLOTS[index]
             for index, control in enumerate(page["controls"])

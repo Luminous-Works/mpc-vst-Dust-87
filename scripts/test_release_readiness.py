@@ -1,6 +1,8 @@
 import json
 import re
+import shutil
 import struct
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -26,6 +28,69 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertEqual(image[:8], b"\x89PNG\r\n\x1a\n")
         return struct.unpack(">II", image[16:24])
 
+    def test_native_sequence_is_transport_synced_and_has_64_steps(self):
+        source = (PROJECT / "src" / "DUST87.cpp").read_text(encoding="utf-8")
+        ui = json.loads((PROJECT / "ui.json").read_text(encoding="utf-8"))
+        sequence_page = next(page for page in ui["pages"] if page["name"] == "SEQ")
+        controls_page = next(page for page in ui["pages"] if page["name"] == "SEQCTL")
+
+        self.assertIn("ctx.transport.playing", source)
+        self.assertIn("ctx.transport.ppqValid", source)
+        self.assertIn("saveExtraState(std::vector<uint8_t>& out) override", source)
+        self.assertIn("loadExtraState(const uint8_t* data, size_t size) override", source)
+        self.assertEqual(
+            [control["param"] for control in sequence_page["controls"]],
+            [f"Step {step:02d}" for step in range(1, 17)],
+        )
+        self.assertEqual(
+            {
+                control["param"]
+                for control in controls_page["controls"]
+                if isinstance(control, dict)
+            },
+            {"Lane", "Bar", "Seq", "Swing", "Rnd Seq", "Clear"},
+        )
+
+    def test_native_sequence_clock_respects_swing_and_four_bar_loop(self):
+        compiler = shutil.which("g++")
+        if compiler is None:
+            self.skipTest("g++ is not installed")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            executable = Path(temp_dir) / "sequencer-clock-test.exe"
+            subprocess.run(
+                [
+                    compiler,
+                    "-std=c++17",
+                    str(ROOT / "tests" / "sequencer_clock_test.cpp"),
+                    "-o",
+                    str(executable),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run([str(executable)], check=True, capture_output=True, text=True)
+
+    def test_native_randomizer_matches_the_original_groove_generator_shape(self):
+        compiler = shutil.which("g++")
+        if compiler is None:
+            self.skipTest("g++ is not installed")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            executable = Path(temp_dir) / "groove-library-test.exe"
+            subprocess.run(
+                [
+                    compiler,
+                    "-std=c++17",
+                    str(ROOT / "tests" / "groove_library_test.cpp"),
+                    "-o",
+                    str(executable),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run([str(executable)], check=True, capture_output=True, text=True)
+
     def test_native_sdk_manifest_and_binary_identity(self):
         manifest = json.loads((PROJECT / "plugin.json").read_text(encoding="utf-8"))
         source = (PROJECT / "src" / "DUST87.cpp").read_text(encoding="utf-8")
@@ -46,6 +111,8 @@ class ReleaseReadinessTests(unittest.TestCase):
         expected = {"Master", "Bit Depth", "Sample Rate", "Drive", "Plate Mix", "Plate Decay"}
         for label in DRUM_LABELS:
             expected.update({f"{label} Tune", f"{label} Decay", f"{label} Level"})
+        expected.update({f"Step {step:02d}" for step in range(1, 17)})
+        expected.update({"Lane", "Bar", "Seq", "Swing", "Rnd Seq", "Clear"})
 
         referenced = set()
         for page in ui["pages"]:
@@ -55,6 +122,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                     referenced.add(control["param"])
 
         self.assertEqual(referenced, expected)
+        self.assertNotIn("Playhead", referenced)
         self.assertEqual(ui["qlinkGroups"], "rows")
 
     def test_native_ui_uses_custom_brand_skin_assets(self):
@@ -76,6 +144,11 @@ class ReleaseReadinessTests(unittest.TestCase):
             "fader_h_uni.png": (248, 36 * 127),
             "seg4_on.png": (58, 40),
             "seg4_off.png": (58, 40),
+            "seq_step_on.png": (54, 52),
+            "seq_step_off.png": (54, 52),
+            "seq_toggle_on.png": (52, 36),
+            "seq_toggle_off.png": (52, 36),
+            "seq_playhead.png": (1227, 100 * 17),
         }
         for filename, dimensions in expected_assets.items():
             with self.subTest(asset=filename):
@@ -141,36 +214,137 @@ class ReleaseReadinessTests(unittest.TestCase):
             params_path = temp / "params.json"
             base_knob = {
                 "componentsData": [
-                    {"componentData": {"type": "Focus"}},
-                    {"componentData": {"type": "Knob"}},
+                    {"componentData": {"type": "Focus"}, "bounds": {"bounds": "0 0 278 107"}},
+                    {"componentData": {"type": "Knob"}, "bounds": {"bounds": "15 15 90 90"}},
+                    {
+                        "componentData": {
+                            "type": "Label",
+                            "name": "name",
+                            "data": {"textStyle": {"font": {"height": 26.0}}},
+                        },
+                        "bounds": {"bounds": "110 12 150 36"},
+                    },
+                    {
+                        "componentData": {
+                            "type": "Label",
+                            "name": "value",
+                            "data": {"textStyle": {"font": {"height": 30.0}}},
+                        },
+                        "bounds": {"bounds": "110 52 150 42"},
+                    },
                 ]
             }
+            base_toggle = {
+                "componentsData": [
+                    {"componentData": {"type": "Focus"}, "bounds": {"bounds": "0 0 278 107"}},
+                    {
+                        "componentData": {
+                            "type": "Label",
+                            "name": "name",
+                            "data": {"textStyle": {"font": {"height": 26.0}}},
+                        },
+                        "bounds": {"bounds": "15 12 170 36"},
+                    },
+                    {
+                        "componentData": {
+                            "type": "Label",
+                            "name": "value",
+                            "data": {"textStyle": {"font": {"height": 30.0}}},
+                        },
+                        "bounds": {"bounds": "15 52 170 42"},
+                    },
+                    {
+                        "componentData": {
+                            "type": "Button",
+                            "data": {
+                                "onImage": "toggle_on.png",
+                                "offImage": "toggle_off.png",
+                            },
+                        },
+                        "bounds": {"bounds": "186 20 84 68"},
+                    },
+                ]
+            }
+
+            def control(name, component_type):
+                return {
+                    "componentData": {"name": name, "type": component_type},
+                    "handle remapping": {
+                        "version": 1,
+                        "map": [{"key": "Data", "value": "Parameter 3"}],
+                    },
+                    "bounds": {"bounds": "0 0 278 107"},
+                }
+
             tabs = []
-            for page in json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))["pages"]:
+            pages = json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))["pages"]
+            for page in pages:
+                if page["name"] == "SEQ":
+                    components = [
+                        control(f"Step {step:02d}", "toggle")
+                        for step in range(1, 17)
+                    ]
+                elif page["name"] == "SEQCTL":
+                    components = [
+                        control("Lane", "knobUniMenu"),
+                        control("Bar", "radio4"),
+                        control("Seq", "toggle"),
+                        control("Swing", "faderUni"),
+                        control("Rnd Seq", "toggle"),
+                        control("Clear", "toggle"),
+                    ]
+                    components.extend(
+                        {
+                            "componentData": {"name": f"Bar seg {step}", "type": "Label"},
+                            "bounds": {"bounds": "0 0 58 26"},
+                        }
+                        for step in range(4)
+                    )
+                else:
+                    components = []
+                    for spec in page["controls"]:
+                        if not isinstance(spec, dict):
+                            continue
+                        widget = spec.get("widget")
+                        component_type = {
+                            "knob": "knobUni",
+                            "fader": "faderUni",
+                            "switch": "radio4",
+                        }[widget]
+                        components.append(control(spec["param"], component_type))
                 tabs.append({
+                    "tabName": page["name"],
                     "componentDefinition": {
-                        "componentsData": [{
-                            "componentData": {"type": "knobUni"},
-                            "handle remapping": {"map": [{"key": "Data", "value": "Parameter 3"}]},
-                        }]
+                        "componentsData": components
                     }
                 })
+            tabs[5]["qlinkBoundsData"] = ["0 0 640 314", "640 314 640 314"]
             tui = {
                 "pageData": {
                     "componentDefinitions": {
                         "localComponentDefinitions": [
                             {"key": "knobUni", "value": base_knob},
                             {"key": "knobBi", "value": base_knob},
+                            {"key": "knobUniMenu", "value": base_knob},
+                            {"key": "toggle", "value": base_toggle},
                         ]
                     },
                     "tabs": tabs,
                 }
             }
             (generated / "TUI.json").write_text(json.dumps(tui), encoding="utf-8")
-            (generated / "Q-Links.json").write_text('{"generated": true}', encoding="utf-8")
+            (generated / "Q-Links.json").write_text(json.dumps({
+                "Screen Mode Q-Links": {
+                    "map": [
+                        {"Tab": index, "Q-Links": {"Q-Link 1": index}}
+                        for index in range(1, len(pages) + 1)
+                    ]
+                }
+            }), encoding="utf-8")
             params_path.write_text(json.dumps({
                 "params": [
-                    {"index": 60, "name": "Beat Pulse", "automatable": False}
+                    {"index": 60, "name": "Beat Pulse", "automatable": False},
+                    {"index": 67, "name": "Playhead", "automatable": False},
                 ]
             }), encoding="utf-8")
 
@@ -182,29 +356,62 @@ class ReleaseReadinessTests(unittest.TestCase):
                 entry["key"]: entry["value"]
                 for entry in page_data["componentDefinitions"]["localComponentDefinitions"]
             }
-            for page, tab in zip(
-                json.loads((ROOT / "ui.json").read_text(encoding="utf-8"))["pages"],
-                page_data["tabs"],
-            ):
-                instance = tab["componentDefinition"]["componentsData"][0]
-                page_key = f"knobUniPulse_{page['name'].lower()}"
-                self.assertEqual(instance["componentData"]["type"], page_key)
-                self.assertIn(
-                    {"key": "Pulse", "value": "Parameter 60"},
-                    instance["handle remapping"]["map"],
+            self.assertEqual(len(page_data["tabs"]), 6)
+            self.assertNotIn("toggle", definitions)
+            for page, tab in zip(pages[:6], page_data["tabs"]):
+                components = tab["componentDefinition"]["componentsData"]
+                knobs = [
+                    instance for instance in components
+                    if instance["componentData"]["type"].startswith(("knobUniPulse_", "knobBiPulse_"))
+                ]
+                expected_knobs = sum(
+                    control.get("widget") == "knob"
+                    for control in page["controls"]
+                    if isinstance(control, dict)
                 )
-                pulse = next(
-                    child for child in definitions[page_key]["componentsData"]
-                    if child["componentData"]["type"] == "Image"
-                )
-                self.assertEqual(
-                    pulse["componentData"]["data"]["image"],
-                    f"pulse_ring_{page['name'].lower()}.png",
-                )
+                self.assertEqual(len(knobs), expected_knobs)
+                for instance in knobs:
+                    page_key = instance["componentData"]["type"]
+                    self.assertIn(
+                        {"key": "Pulse", "value": "Parameter 60"},
+                        instance["handle remapping"]["map"],
+                    )
+                    pulse = next(
+                        child for child in definitions[page_key]["componentsData"]
+                        if child["componentData"]["type"] == "Image"
+                    )
+                    self.assertEqual(
+                        pulse["componentData"]["data"]["image"],
+                        f"pulse_ring_{page['name'].lower()}.png",
+                    )
+
+            sequence_components = page_data["tabs"][5]["componentDefinition"]["componentsData"]
             self.assertEqual(
-                (output / "Q-Links.json").read_text(encoding="utf-8"),
-                '{"generated": true}',
+                sum(component["componentData"]["type"] == "sequenceStep"
+                    for component in sequence_components),
+                16,
             )
+            self.assertEqual(page_data["tabs"][5]["qlinkBoundsData"], [])
+            for entry in page_data["componentDefinitions"]["localComponentDefinitions"]:
+                for image_name in self.referenced_images(entry["value"]):
+                    self.assertTrue(
+                        (ROOT / "assets" / image_name).is_file(),
+                        f"TUI references missing skin image {image_name}",
+                    )
+            qlinks = json.loads((output / "Q-Links.json").read_text(encoding="utf-8"))
+            qlink_tabs = qlinks["Screen Mode Q-Links"]["map"]
+            self.assertEqual([item["Tab"] for item in qlink_tabs], list(range(1, 7)))
+            self.assertEqual(qlink_tabs[5]["Q-Links"], {"Q-Link 1": -1})
+
+    def referenced_images(self, value):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if key in {"image", "onImage", "offImage"} and isinstance(child, str):
+                    yield child
+                yield from self.referenced_images(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from self.referenced_images(child)
 
     def test_skin_preparation_rejects_an_automatable_pulse_parameter(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -230,6 +437,7 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertIn("not screenshots captured from MPC hardware", readme)
         self.assertTrue((ROOT / "docs" / "screenshots" / "contact-sheet.png").is_file())
         self.assertTrue((ROOT / "docs" / "screenshots" / "mix-layout.png").is_file())
+        self.assertTrue((ROOT / "docs" / "screenshots" / "seq-layout.png").is_file())
 
     def test_readme_lists_all_factory_programs_and_explains_sequencer_capture(self):
         source = (PROJECT / "src" / "DUST87.cpp").read_text(encoding="utf-8")
@@ -241,9 +449,10 @@ class ReleaseReadinessTests(unittest.TestCase):
         for program in programs:
             with self.subTest(program=program):
                 self.assertIn(program, readme)
-        self.assertIn("MPC's built-in Step Sequencer", readme)
-        self.assertIn("DUST '87 is a native instrument plugin, not a sequencer", readme)
-        self.assertIn("has not been captured on MPC hardware", readme)
+        self.assertIn("64-step sequencer", readme)
+        self.assertIn("18 drum lanes", readme)
+        self.assertIn("MPC transport", readme)
+        self.assertIn("not screenshots captured from MPC hardware", readme)
 
     def test_catalog_entry_uses_registry_schema_and_sdk_identity(self):
         manifest = json.loads((PROJECT / "plugin.json").read_text(encoding="utf-8"))

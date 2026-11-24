@@ -848,6 +848,181 @@
           }
         },
         {
+          "key": "knobUniMenu",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Data",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "menu overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "menu overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "19ffffff",
+                    "outlineColour": "ffffb020",
+                    "backgroundInset": 4.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 278 107"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "knob",
+                  "type": "Knob",
+                  "data": {
+                    "version": 2,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "knob_uni.png",
+                    "numFrames": 127,
+                    "invert": false,
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "8 8 90 90"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "name",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 26.0
+                      },
+                      "colour": "ff8290a1",
+                      "justification": "left",
+                      "case": "Original"
+                    },
+                    "type": "Name",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "110 12 156 36"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "value",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 30.0
+                      },
+                      "colour": "ffffffff",
+                      "justification": "left",
+                      "case": "Original"
+                    },
+                    "type": "Value",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "110 52 156 42"
+                }
+              }
+            ]
+          }
+        },
+        {
           "key": "knob overlay",
           "value": {
             "version": 2,
@@ -1135,6 +1310,209 @@
                     "version": 2,
                     "knobType": "FilmStrip",
                     "filmStrip": "knob_uni.png",
+                    "numFrames": 127,
+                    "invert": false,
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "8 8 90 90"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "name",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 26.0
+                      },
+                      "colour": "ff8290a1",
+                      "justification": "left",
+                      "case": "Original"
+                    },
+                    "type": "Name",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "110 12 156 36"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "value",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 30.0
+                      },
+                      "colour": "ffffffff",
+                      "justification": "left",
+                      "case": "Original"
+                    },
+                    "type": "Value",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "110 52 156 42"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "knobBiPulse_mix",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Data",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay bipolar"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay bipolar"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "19ffffff",
+                    "outlineColour": "ffffb020",
+                    "backgroundInset": 4.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 278 107"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "Beat pulse ring",
+                  "type": "Image",
+                  "data": {
+                    "version": 2,
+                    "imageType": "FilmStrip",
+                    "colour": "0",
+                    "image": "pulse_ring_mix.png",
+                    "numFrames": 127,
+                    "handleName": "Pulse"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 106 106"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "knob",
+                  "type": "Knob",
+                  "data": {
+                    "version": 2,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "knob_bi.png",
                     "numFrames": 127,
                     "invert": false,
                     "handleName": "Data"
@@ -2043,7 +2421,7 @@
           }
         },
         {
-          "key": "knobBiPulse_more",
+          "key": "sequenceStep",
           "value": {
             "version": 2,
             "actions": [
@@ -2056,17 +2434,10 @@
               },
               {
                 "version": 1,
-                "onAction": "Double Click",
-                "handler": "Show Overlay",
-                "handleName": "Data",
-                "additionalData": "knob overlay bipolar"
-              },
-              {
-                "version": 1,
                 "onAction": "Enter Pressed",
                 "handler": "Show Overlay",
                 "handleName": "Data",
-                "additionalData": "knob overlay bipolar"
+                "additionalData": "knob overlay"
               }
             ],
             "backgroundData": {
@@ -2109,63 +2480,7 @@
                   "showWhenDataModelInvalid": "Show",
                   "whenVisible": "WhenFocussed",
                   "boundsType": "Absolute",
-                  "bounds": "0 0 278 107"
-                }
-              },
-              {
-                "version": 2,
-                "componentData": {
-                  "version": 1,
-                  "name": "Beat pulse ring",
-                  "type": "Image",
-                  "data": {
-                    "version": 2,
-                    "imageType": "FilmStrip",
-                    "colour": "0",
-                    "image": "pulse_ring_more.png",
-                    "numFrames": 127,
-                    "handleName": "Pulse"
-                  }
-                },
-                "handle remapping": {
-                  "version": 1,
-                  "map": []
-                },
-                "bounds": {
-                  "version": 1,
-                  "acceptsHWFocus": "No",
-                  "showWhenDataModelInvalid": "Show",
-                  "whenVisible": "Always",
-                  "boundsType": "Absolute",
-                  "bounds": "0 0 106 106"
-                }
-              },
-              {
-                "version": 2,
-                "componentData": {
-                  "version": 1,
-                  "name": "knob",
-                  "type": "Knob",
-                  "data": {
-                    "version": 2,
-                    "knobType": "FilmStrip",
-                    "filmStrip": "knob_bi.png",
-                    "numFrames": 127,
-                    "invert": false,
-                    "handleName": "Data"
-                  }
-                },
-                "handle remapping": {
-                  "version": 1,
-                  "map": []
-                },
-                "bounds": {
-                  "version": 1,
-                  "acceptsHWFocus": "No",
-                  "showWhenDataModelInvalid": "Show",
-                  "whenVisible": "Always",
-                  "boundsType": "Absolute",
-                  "bounds": "8 8 90 90"
+                  "bounds": "0 0 72 100"
                 }
               },
               {
@@ -2182,7 +2497,475 @@
                         "version": 1,
                         "name": "Titillium Web",
                         "style": "Regular",
-                        "height": 26.0
+                        "height": 12.0
+                      },
+                      "colour": "ff8290a1",
+                      "justification": "horizontallyCentred",
+                      "case": "Original"
+                    },
+                    "type": "Name",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "3 5 66 20"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "toggle",
+                  "type": "Button",
+                  "data": {
+                    "version": 2,
+                    "onImage": "seq_step_on.png",
+                    "offImage": "seq_step_off.png",
+                    "buttonId": 1,
+                    "numButtonsInGroup": 1,
+                    "handleName": "Data",
+                    "gestureBehaviour": "Instant"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "9 36 54 52"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sequenceToggle",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Data",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "19ffffff",
+                    "outlineColour": "ffffb020",
+                    "backgroundInset": 4.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 100 105"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "name",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 13.0
+                      },
+                      "colour": "ff8290a1",
+                      "justification": "horizontallyCentred",
+                      "case": "Original"
+                    },
+                    "type": "Name",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "4 8 92 23"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "value",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 12.0
+                      },
+                      "colour": "ffffffff",
+                      "justification": "horizontallyCentred",
+                      "case": "Original"
+                    },
+                    "type": "Value",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "4 31 92 17"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "toggle",
+                  "type": "Button",
+                  "data": {
+                    "version": 2,
+                    "onImage": "seq_toggle_on.png",
+                    "offImage": "seq_toggle_off.png",
+                    "buttonId": 1,
+                    "numButtonsInGroup": 1,
+                    "handleName": "Data",
+                    "gestureBehaviour": "Instant"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "23 53 54 36"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sequenceAction",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Data",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "19ffffff",
+                    "outlineColour": "ffffb020",
+                    "backgroundInset": 4.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 100 105"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "name",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 13.0
+                      },
+                      "colour": "ff8290a1",
+                      "justification": "horizontallyCentred",
+                      "case": "Original"
+                    },
+                    "type": "Name",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "4 8 92 23"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "toggle",
+                  "type": "Button",
+                  "data": {
+                    "version": 2,
+                    "onImage": "seq_step_on.png",
+                    "offImage": "seq_step_off.png",
+                    "buttonId": 1,
+                    "numButtonsInGroup": 1,
+                    "handleName": "Data",
+                    "gestureBehaviour": "Instant"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "23 48 54 52"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sequenceLane",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Data",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "menu overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "menu overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "00000000",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "19ffffff",
+                    "outlineColour": "ffffb020",
+                    "backgroundInset": 4.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 194 105"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "knob",
+                  "type": "Knob",
+                  "data": {
+                    "version": 2,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "knob_uni.png",
+                    "numFrames": 127,
+                    "invert": false,
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "1 7 90 90"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "name",
+                  "type": "Label",
+                  "data": {
+                    "version": 1,
+                    "textStyle": {
+                      "version": 1,
+                      "font": {
+                        "version": 1,
+                        "name": "Titillium Web",
+                        "style": "Regular",
+                        "height": 13.0
                       },
                       "colour": "ff8290a1",
                       "justification": "left",
@@ -2202,7 +2985,7 @@
                   "showWhenDataModelInvalid": "Show",
                   "whenVisible": "Always",
                   "boundsType": "Absolute",
-                  "bounds": "110 12 156 36"
+                  "bounds": "96 20 94 25"
                 }
               },
               {
@@ -2219,7 +3002,7 @@
                         "version": 1,
                         "name": "Titillium Web",
                         "style": "Regular",
-                        "height": 30.0
+                        "height": 16.0
                       },
                       "colour": "ffffffff",
                       "justification": "left",
@@ -2239,7 +3022,7 @@
                   "showWhenDataModelInvalid": "Show",
                   "whenVisible": "Always",
                   "boundsType": "Absolute",
-                  "bounds": "110 52 156 42"
+                  "bounds": "96 48 94 34"
                 }
               }
             ]
@@ -2264,6 +3047,171 @@
           "22k",
           "26k",
           "44k"
+        ]
+      },
+      {
+        "key": "Parameter 61",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 62",
+        "value": [
+          "Kick",
+          "Sub",
+          "Snare",
+          "Crack",
+          "Rim",
+          "Clap",
+          "CHat",
+          "OHat",
+          "LoTom",
+          "MidTom",
+          "HiTom",
+          "Crash",
+          "Ride",
+          "CBell",
+          "Clave",
+          "Shaker",
+          "Metal",
+          "Zap"
+        ]
+      },
+      {
+        "key": "Parameter 63",
+        "value": [
+          "BAR 1",
+          "BAR 2",
+          "BAR 3",
+          "BAR 4"
+        ]
+      },
+      {
+        "key": "Parameter 65",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 66",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 68",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 69",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 70",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 71",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 72",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 73",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 74",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 75",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 76",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 77",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 78",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 79",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 80",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 81",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 82",
+        "value": [
+          "Off",
+          "On"
+        ]
+      },
+      {
+        "key": "Parameter 83",
+        "value": [
+          "Off",
+          "On"
         ]
       }
     ],
@@ -2781,12 +3729,196 @@
                 "boundsType": "Absolute",
                 "bounds": "343 196 278 107"
               }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Metal Tune",
+                "type": "knobBiPulse_mix",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 49"
+                  },
+                  {
+                    "key": "Pulse",
+                    "value": "Parameter 60"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "663 196 278 107"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Metal Decay",
+                "type": "faderUni",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 50"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "983 196 278 107"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Metal Level",
+                "type": "faderUni",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 51"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "23 346 278 107"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Zap Tune",
+                "type": "knobBiPulse_mix",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 52"
+                  },
+                  {
+                    "key": "Pulse",
+                    "value": "Parameter 60"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "663 346 278 107"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Zap Decay",
+                "type": "faderUni",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 53"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "983 346 278 107"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Zap Level",
+                "type": "faderUni",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 54"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "23 497 278 107"
+              }
             }
           ]
         },
         "qlinkBoundsData": [
           "13 35 1258 127",
-          "13 186 618 127"
+          "13 186 1258 127",
+          "13 336 1258 127",
+          "13 487 298 127"
         ]
       },
       {
@@ -4379,7 +5511,7 @@
       },
       {
         "version": 1,
-        "tabName": "MORE",
+        "tabName": "SEQ",
         "fnKeyIndex": 5,
         "fnKeySubIndex": 0,
         "componentDefinition": {
@@ -4390,12 +5522,12 @@
             "focussed": {
               "version": 1,
               "colour": "ff151a22",
-              "image": "more-bg.png"
+              "image": "seq-bg.png"
             },
             "unfocussed": {
               "version": 1,
               "colour": "ff151a22",
-              "image": "more-bg.png"
+              "image": "seq-bg.png"
             }
           },
           "ignoreMousePresses": false,
@@ -4405,8 +5537,8 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Metal Tune",
-                "type": "knobBiPulse_more",
+                "name": "Step 01",
+                "type": "sequenceStep",
                 "data": {
                   "version": 1,
                   "handleName": "Data"
@@ -4417,102 +5549,681 @@
                 "map": [
                   {
                     "key": "Data",
-                    "value": "Parameter 49"
+                    "value": "Parameter 68"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "26 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 02",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 69"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "103 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 03",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 70"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "180 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 04",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 71"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "257 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 05",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 72"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "334 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 06",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 73"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "411 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 07",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 74"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "488 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 08",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 75"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "565 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 09",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 76"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "642 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 10",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 77"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "719 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 11",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 78"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "796 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 12",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 79"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "873 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 13",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 80"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "950 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 14",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 81"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "1027 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 15",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 82"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "1104 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Step 16",
+                "type": "sequenceStep",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 83"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "1181 280 72 100"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Lane",
+                "type": "sequenceLane",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 62"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "24 72 194 105"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Bar",
+                "type": "radio4",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 63"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "228 72 248 105"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Bar seg 0",
+                "type": "Label",
+                "data": {
+                  "version": 1,
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Titillium Web",
+                      "style": "Regular",
+                      "height": 22.0
+                    },
+                    "colour": "ffffffff",
+                    "justification": "horizontallyCentred verticallyCentred",
+                    "case": "Original"
                   },
-                  {
-                    "key": "Pulse",
-                    "value": "Parameter 60"
-                  }
-                ]
+                  "type": "Text",
+                  "handleName": "Data",
+                  "text": "BAR 1"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
               },
               "bounds": {
                 "version": 1,
-                "acceptsHWFocus": "Yes",
+                "acceptsHWFocus": "No",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "23 45 278 107"
+                "bounds": "243 122 58 26"
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Metal Decay",
-                "type": "faderUni",
+                "name": "Bar seg 1",
+                "type": "Label",
                 "data": {
                   "version": 1,
-                  "handleName": "Data"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 50"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 1,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "343 45 278 107"
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "Metal Level",
-                "type": "faderUni",
-                "data": {
-                  "version": 1,
-                  "handleName": "Data"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 51"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 1,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "663 45 278 107"
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "Zap Tune",
-                "type": "knobBiPulse_more",
-                "data": {
-                  "version": 1,
-                  "handleName": "Data"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 52"
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Titillium Web",
+                      "style": "Regular",
+                      "height": 22.0
+                    },
+                    "colour": "ffffffff",
+                    "justification": "horizontallyCentred verticallyCentred",
+                    "case": "Original"
                   },
+                  "type": "Text",
+                  "handleName": "Data",
+                  "text": "BAR 2"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "301 122 58 26"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Bar seg 2",
+                "type": "Label",
+                "data": {
+                  "version": 1,
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Titillium Web",
+                      "style": "Regular",
+                      "height": 22.0
+                    },
+                    "colour": "ffffffff",
+                    "justification": "horizontallyCentred verticallyCentred",
+                    "case": "Original"
+                  },
+                  "type": "Text",
+                  "handleName": "Data",
+                  "text": "BAR 3"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "359 122 58 26"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Bar seg 3",
+                "type": "Label",
+                "data": {
+                  "version": 1,
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Titillium Web",
+                      "style": "Regular",
+                      "height": 22.0
+                    },
+                    "colour": "ffffffff",
+                    "justification": "horizontallyCentred verticallyCentred",
+                    "case": "Original"
+                  },
+                  "type": "Text",
+                  "handleName": "Data",
+                  "text": "BAR 4"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "417 122 58 26"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Seq",
+                "type": "sequenceToggle",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
                   {
-                    "key": "Pulse",
-                    "value": "Parameter 60"
+                    "key": "Data",
+                    "value": "Parameter 61"
                   }
                 ]
               },
@@ -4522,14 +6233,14 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "23 196 278 107"
+                "bounds": "486 72 100 105"
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Zap Decay",
+                "name": "Swing",
                 "type": "faderUni",
                 "data": {
                   "version": 1,
@@ -4541,7 +6252,7 @@
                 "map": [
                   {
                     "key": "Data",
-                    "value": "Parameter 53"
+                    "value": "Parameter 64"
                   }
                 ]
               },
@@ -4551,15 +6262,15 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "343 196 278 107"
+                "bounds": "596 72 248 105"
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Zap Level",
-                "type": "faderUni",
+                "name": "Rnd Seq",
+                "type": "sequenceAction",
                 "data": {
                   "version": 1,
                   "handleName": "Data"
@@ -4570,7 +6281,7 @@
                 "map": [
                   {
                     "key": "Data",
-                    "value": "Parameter 54"
+                    "value": "Parameter 65"
                   }
                 ]
               },
@@ -4580,15 +6291,74 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "663 196 278 107"
+                "bounds": "854 72 110 105"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Clear",
+                "type": "sequenceAction",
+                "data": {
+                  "version": 1,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 66"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "974 72 110 105"
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "Sequencer playhead",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "seq_playhead.png",
+                  "numFrames": 17,
+                  "handleName": "Playhead"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Playhead",
+                    "value": "Parameter 67"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 1,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Show",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "26 280 1227 100"
               }
             }
           ]
         },
-        "qlinkBoundsData": [
-          "13 35 938 127",
-          "13 186 938 127"
-        ]
+        "qlinkBoundsData": []
       }
     ]
   }
