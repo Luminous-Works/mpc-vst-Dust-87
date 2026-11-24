@@ -1,0 +1,8 @@
+{
+  "name": "DUST '87 — Lumina.Aerospace",
+  "description": "12-bit lo-fi MPC drum sampler plugin with touch-first workflow, velocity-reactive controls, plate reverb, 64-step sequencer, and Open-MPC release validation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

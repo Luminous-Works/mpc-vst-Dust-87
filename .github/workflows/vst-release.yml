@@ -1,0 +1,30 @@
+name: Open-MPC VST Release & Validation
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  validate-dust87:
+    name: Validate Preset Schema, Quarantine & Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run validate
+      - run: npm run lint
+      - run: npm run build
+
+  open-mpc-release:
+    name: Package Open-MPC Multi-Arch Release
+    needs: validate-dust87
+    uses: open-mpc/mpc-vst-plugins/.github/workflows/vst-release.yml@main
+    with:
+      vst_json: vst.json
+      catalog_entry: catalog/plugins/dust87.json
+      plugin_id: dust87

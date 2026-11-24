@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Chakra Petch', sans-serif;
+    --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #0b0e14;
+    color: #eef2f8;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Brushed Anodized Aluminum Outer Chassis (inspired by Audity '78 & Evil Tuner) */
+.aluminum-chassis {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.015) 0px,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(180deg, #3c4350 0%, #2a303b 12%, #20252f 88%, #161a22 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.55),
+    0 24px 60px rgba(0, 0, 0, 0.78);
+}
+
+/* Brushed Silver-Aluminum Bezel Strip */
+.aluminum-rail {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 0px,
+      rgba(255, 255, 255, 0.04) 1px,
+      rgba(0, 0, 0, 0.03) 1px,
+      rgba(0, 0, 0, 0.03) 2px
+    ),
+    linear-gradient(180deg, #cfd6e0 0%, #9aa4b4 48%, #7d8798 52%, #aeb7c4 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.45);
+}
+
+/* Multi-colored Audity-style Anodized Steel Module Bay */
+.module-cobalt {
+  background: linear-gradient(180deg, #1d3c66 0%, #152b4b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(147, 197, 253, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.module-steel-teal {
+  background: linear-gradient(180deg, #163742 0%, #0f252e 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(103, 232, 249, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.module-gunmetal {
+  background: linear-gradient(180deg, #252b36 0%, #191d25 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+}
+
+.module-slate-plum {
+  background: linear-gradient(180deg, #2a243d 0%, #1b1729 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(196, 181, 253, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+}
+
+/* High-Contrast Recessed Hardware LCD Glass */
+.lcd-screen {
+  background: radial-gradient(ellipse at 50% 0%, #0e1a2b 0%, #05080f 80%);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.chassis-surface {
+  background: linear-gradient(180deg, #1c212b 0%, #12151c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+.panel-inset {
+  background: linear-gradient(180deg, #070b12 0%, #0c121d 100%);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.hardware-pad {
+  background: linear-gradient(180deg, #222834 0%, #151922 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.65),
+    0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Tactile machined aluminum square button */
+.alu-button {
+  background: linear-gradient(180deg, #323947 0%, #20252f 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+/* Custom sleek dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0c10;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a4252;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f5a623;
+}
