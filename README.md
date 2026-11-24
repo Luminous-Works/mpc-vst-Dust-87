@@ -11,8 +11,12 @@
 - **18 procedural percussion voices**, selected by MIDI notes 36-53; out-of-range notes wrap through the same map.
 - **Per-voice controls:** Tune, Decay, and Level.
 - **Global mix controls:** Master, Bit Depth, Sample Rate, Drive, Plate Mix, and Plate Decay.
-- **Eight built-in programs** for factory, tape, sub, lo-fi, dry, and plate starting points.
-- **MPC-native sequencing:** use MPC pads and sequences to trigger the instrument; DUST '87 does not include a separate sequencer or emit MIDI.
+- **8 built-in factory programs:** Factory 87, Tape Dust, Sub Heavy, Lo-Fi Break, Crate Snare, Dry Machine, Dark Plate, and Bright 12.
+- **MPC-native sequencing:** the MPC pads and Step Sequencer send note events to the instrument; DUST '87 does not include a separate sequencer or emit MIDI.
+
+## Sequencing and host screenshots
+
+DUST '87 is a native instrument plugin, not a sequencer. The MPC's built-in Step Sequencer runs in the host and sends MIDI notes to DUST '87; there is no DUST Step Sequencer page. The screenshots in this repository show the custom plugin skin only. A Step Sequencer screenshot with DUST '87 loaded has not been captured on MPC hardware, so it is intentionally not represented by a mockup.
 
 ## Touch UI
 
