@@ -1,10 +1,10 @@
 # DUST '87 - MPC Drum Instrument
 
-![DUST '87 MPC SDK touch UI layout previews](docs/screenshots/contact-sheet.png)
+![DUST '87 custom MPC touch skin previews](docs/screenshots/contact-sheet.png)
 
 **A native MPC SDK drum instrument from Lumina.Aerospace.** DUST '87 makes 18 procedural percussion voices, shaped with per-drum Tune, Decay, and Level controls, then processed through lo-fi bit/sample-rate reduction, drive, and plate-style reverb.
 
-> The images above are generated layout previews from `ui.json`, not screenshots captured from MPC hardware. Device screenshots will be added after hardware testing.
+> The images above are generated previews composed from the native MPC layout and custom skin assets, not screenshots captured from MPC hardware. Device screenshots will be added after hardware testing.
 
 ## What it is
 
@@ -16,7 +16,7 @@
 
 ## Touch UI
 
-The six SDK-generated pages are MIX, KICK, SNARE, TOMS, PERC, and MORE. Each preview is rendered from the current `ui.json`; it is a layout guide, not a capture of the SDK skin running on an MPC.
+The six native SDK pages are MIX, KICK, SNARE, TOMS, PERC, and MORE. DUST supplies its own brushed-aluminum faceplate, recessed dark display, beveled control wells, machined-metal knobs and faders, and segmented-button artwork. Every knob also has a page-accented ring that follows a hidden, non-automatable MIDI-velocity pulse; the colored dust particles remain part of each page. The previews below are composed from those assets and the `ui.json` control layout, not captured from an MPC.
 
 ![Generated MIX-page layout preview](docs/screenshots/mix-layout.png)
 
@@ -31,23 +31,29 @@ The six SDK-generated pages are MIX, KICK, SNARE, TOMS, PERC, and MORE. Each pre
 
 ## Build and host-test
 
-Check out the [MPC Plugin Builder SDK](https://github.com/inmusic-software/mpc-plugin-builder-sdk). From the SDK checkout, build this repository with:
+Check out the [MPC Plugin Builder SDK](https://github.com/inmusic-software/mpc-plugin-builder-sdk). From the SDK checkout, the first build generates the native parameter dump; then generate and patch the TUI before building all device targets:
 
 ```sh
+python tools/build.py /path/to/mpc-vst-Dust-87 --target native
+python tools/gen_ui.py --params /path/to/mpc-vst-Dust-87/build/params.json --out /path/to/mpc-vst-Dust-87/build/generated-skin --kit-cache /path/to/mpc-vst-Dust-87/build --ui /path/to/mpc-vst-Dust-87/ui.json
+python /path/to/mpc-vst-Dust-87/tools/prepare_mpc_skin.py --generated /path/to/mpc-vst-Dust-87/build/generated-skin
 python tools/build.py /path/to/mpc-vst-Dust-87 --target all
 ```
 
-The SDK builds native, ARM32, and ARM64 targets and validates the manifest and generated touch skin. Run its host simulator against the native binary:
+The SDK builds native, ARM32, and ARM64 targets and validates the manifest and custom touch skin. After the first setup, rebuilds only need the `--target all` command. Run the SDK host simulator against the native binary:
 
 ```sh
 .sdk-tools/host_sim /path/to/mpc-vst-Dust-87/build/native/dust--87.so test --wav /tmp/dust87-test.wav
 ```
 
-Regenerate the documentation previews after editing `ui.json`:
+Regenerate the custom skin art and documentation previews after changing its design:
 
 ```sh
+python tools/render_skin.py
 python tools/render_ui_previews.py
 ```
+
+If the native parameter layout changes, regenerate the SDK TUI and run `prepare_mpc_skin.py` again before packaging. The artwork generator requires Pillow; the SDK build itself uses the committed PNG assets and does not require Pillow. The generated graphics and animated knob overlays are native MPC skin assets, not a browser UI.
 
 The [Open-MPC release workflow](https://open-mpc.github.io/workflow.html) runs metadata checks, SDK builds, and host simulation. Packaging is manual and defaults to `dry_run: true`.
 
@@ -64,7 +70,10 @@ plugin.json                      MPC SDK manifest
 ui.json                          six-page MPC touch UI definition
 src/DUST87.cpp                   native instrument implementation
 docs/screenshots/                generated UI layout previews
+assets/                           custom backgrounds and native control artwork
+tools/render_skin.py              custom MPC skin asset generator
 tools/render_ui_previews.py      preview image generator
+tools/prepare_mpc_skin.py        native beat-reactive knob overlay preparer
 catalog/plugins/dust87.json      proposed Open-MPC registry metadata
 .github/workflows/               pinned SDK build and release workflow
 scripts/test_release_readiness.py manifest, UI, catalog, and workflow checks

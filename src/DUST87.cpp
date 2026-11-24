@@ -40,6 +40,8 @@ enum GlobalParam
     kPlateDecay,
     kNumParams
 };
+constexpr int kBeatPulse = kNumParams;
+constexpr int kTotalParams = kNumParams + 1;
 
 constexpr int kMaster = 0;
 constexpr int kVoiceLayers = 2;
@@ -410,8 +412,11 @@ public:
         addParam(mpc::floatParam("drive", "Drive", 0.0f, 100.0f, 18.0f, "%", 0));
         addParam(mpc::floatParam("plate_mix", "Plate Mix", 0.0f, 100.0f, 22.0f, "%", 0));
         addParam(mpc::floatParam("plate_decay", "Plate Decay", 0.3f, 6.0f, 2.0f, "s", 1));
+        mpc::Param beatPulseParam = mpc::floatParam("beat_pulse", "Beat Pulse", 0.0f, 1.0f, 0.0f, "", 3);
+        beatPulseParam.automatable = false;
+        addParam(beatPulseParam);
 
-        if (numParams() != kNumParams) mpc::log("DUST '87: parameter count mismatch");
+        if (numParams() != kTotalParams) mpc::log("DUST '87: parameter count mismatch");
         addPrograms();
     }
 
@@ -436,10 +441,24 @@ public:
         heldLeft_ = heldRight_ = 0.0f;
         sampleHoldPhase_ = 1.0f;
         noteCounter_ = 0;
+        beatPulse_ = 0.0f;
+        set(kBeatPulse, beatPulse_);
+    }
+
+    void saveExtraState(std::vector<uint8_t>& out) override
+    {
+        out.clear();
+        // The beat ring is transient UI state; clear it when a project is saved.
+        set(kBeatPulse, 0.0f);
     }
 
     void process(mpc::ProcessContext& ctx) override
     {
+        const float pulseDecay = std::pow(
+            0.86f,
+            static_cast<float>(ctx.numFrames) * 60.0f / sampleRate_);
+        beatPulse_ *= pulseDecay;
+
         const int bitIndex = mpc::clamp(getInt(kBitDepth), 0, 3);
         const int rateIndex = mpc::clamp(getInt(kSampleRate), 0, 3);
         static const int bitDepths[4] = {8, 10, 12, 16};
@@ -476,6 +495,7 @@ public:
             position = eventPosition;
         }
         render(ctx, position, ctx.numFrames, holdRatio, bits, drive, driveNorm, plateMix);
+        set(kBeatPulse, beatPulse_);
     }
 
 private:
@@ -551,6 +571,9 @@ private:
     {
         if (event.isNoteOn())
         {
+            beatPulse_ = std::fmax(
+                beatPulse_,
+                mpc::clamp(static_cast<float>(event.velocity()) / 127.0f, 0.15f, 1.0f));
             const int drum = ((event.note() - 36) % kNumDrums + kNumDrums) % kNumDrums;
             if (drum == kClosedHat)
                 for (DrumVoice& voice : voices_[kOpenHat].voices) voice.kill();
@@ -627,6 +650,7 @@ private:
     float sampleHoldPhase_ = 1.0f;
     float heldLeft_ = 0.0f;
     float heldRight_ = 0.0f;
+    float beatPulse_ = 0.0f;
     float lastPlateDecay_ = 2.0f;
     uint32_t noteCounter_ = 0;
 };

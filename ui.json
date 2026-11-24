@@ -4,6 +4,7 @@
   "pages": [
     {
       "name": "MIX",
+      "background": "mix-bg.png",
       "controls": [
         { "param": "Master", "widget": "fader" },
         { "param": "Bit Depth", "widget": "switch" },
@@ -25,6 +26,7 @@
     },
     {
       "name": "KICK",
+      "background": "kick-bg.png",
       "controls": [
         { "param": "Kick Tune", "widget": "knob" }, { "param": "Kick Decay", "widget": "fader" }, { "param": "Kick Level", "widget": "fader" }, "empty",
         { "param": "Sub Tune", "widget": "knob" }, { "param": "Sub Decay", "widget": "fader" }, { "param": "Sub Level", "widget": "fader" }, "empty",
@@ -34,6 +36,7 @@
     },
     {
       "name": "SNARE",
+      "background": "snare-bg.png",
       "controls": [
         { "param": "Rim Tune", "widget": "knob" }, { "param": "Rim Decay", "widget": "fader" }, { "param": "Rim Level", "widget": "fader" }, "empty",
         { "param": "Clap Tune", "widget": "knob" }, { "param": "Clap Decay", "widget": "fader" }, { "param": "Clap Level", "widget": "fader" }, "empty",
@@ -43,6 +46,7 @@
     },
     {
       "name": "TOMS",
+      "background": "toms-bg.png",
       "controls": [
         { "param": "LoTom Tune", "widget": "knob" }, { "param": "LoTom Decay", "widget": "fader" }, { "param": "LoTom Level", "widget": "fader" }, "empty",
         { "param": "MidTom Tune", "widget": "knob" }, { "param": "MidTom Decay", "widget": "fader" }, { "param": "MidTom Level", "widget": "fader" }, "empty",
@@ -52,6 +56,7 @@
     },
     {
       "name": "PERC",
+      "background": "perc-bg.png",
       "controls": [
         { "param": "Ride Tune", "widget": "knob" }, { "param": "Ride Decay", "widget": "fader" }, { "param": "Ride Level", "widget": "fader" }, "empty",
         { "param": "CBell Tune", "widget": "knob" }, { "param": "CBell Decay", "widget": "fader" }, { "param": "CBell Level", "widget": "fader" }, "empty",
@@ -61,6 +66,7 @@
     },
     {
       "name": "MORE",
+      "background": "more-bg.png",
       "controls": [
         { "param": "Metal Tune", "widget": "knob" }, { "param": "Metal Decay", "widget": "fader" }, { "param": "Metal Level", "widget": "fader" }, "empty",
         { "param": "Zap Tune", "widget": "knob" }, { "param": "Zap Decay", "widget": "fader" }, { "param": "Zap Level", "widget": "fader" }, "empty",
@@ -70,9 +76,9 @@
     }
   ],
   "style": {
-    "background": "ff1e1d1e",
-    "accent": "ffd31145",
+    "background": "ff151a22",
+    "accent": "ffffb020",
     "text": "ffffffff",
-    "muted": "ff6a6a6c"
+    "muted": "ff8290a1"
   }
 }
