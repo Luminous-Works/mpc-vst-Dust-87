@@ -1,0 +1,17 @@
+{
+  "name": "DUST '87",
+  "manufacturer": "Lumina.Aerospace",
+  "version": "0.1.0",
+  "format": "vst2",
+  "kind": "instrument",
+  "uid": "LMD8",
+  "numInputs": 0,
+  "numOutputs": 2,
+  "category": "Drums",
+  "file32": "VST/dust--87-arm32.so",
+  "file64": "VST/dust--87-arm64.so",
+  "description": "Native MPC drum instrument with 18 procedural percussion voices, 8/10/12/16-bit quantization, sample-rate reduction, drive, and plate-style reverb.",
+  "author": "Lumina.Aerospace",
+  "url": "",
+  "license": "GPL-3.0-only"
+}

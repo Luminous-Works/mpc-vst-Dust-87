@@ -1,137 +1,191 @@
 import fs from 'fs';
 import path from 'path';
-import { BUILTIN_PRESETS } from '../src/shared/factoryPresets.ts';
-import { resolveDust87Paths } from '../src/shared/pathResolver.ts';
-import { validateDust87Preset } from '../src/shared/schemaValidator.ts';
 import type { WorkflowCheckItem, WorkflowValidationReport } from '../src/shared/types.ts';
 
-export function runAutomatedPluginValidation(rootDir = process.cwd(), quarantinedCount = 0, userPresetsCount = 0): WorkflowValidationReport {
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readJson(filePath: string): { value: JsonRecord | null; error: string | null } {
+  if (!fs.existsSync(filePath)) {
+    return { value: null, error: `${path.relative(process.cwd(), filePath)} missing` };
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return isRecord(parsed)
+      ? { value: parsed, error: null }
+      : { value: null, error: 'JSON root must be an object' };
+  } catch (error) {
+    return { value: null, error: `JSON parse error: ${String(error)}` };
+  }
+}
+
+function addCheck(checks: WorkflowCheckItem[], id: string, label: string, passed: boolean, detail: string): void {
+  checks.push({ id, label, status: passed ? 'pass' : 'fail', detail });
+}
+
+export function runAutomatedPluginValidation(
+  rootDir = process.cwd(),
+  quarantinedCount = 0,
+  userPresetsCount = 0,
+): WorkflowValidationReport {
+  const projectDir = path.join(rootDir, 'plugins', 'Dust87');
+  const manifestResult = readJson(path.join(projectDir, 'plugin.json'));
+  const manifest = manifestResult.value;
+  const licenseExists = fs.existsSync(path.join(rootDir, 'LICENSE'));
+  const licenseOk = licenseExists && manifest?.license === 'GPL-3.0-only';
   const checks: WorkflowCheckItem[] = [];
 
-  // 1. Check GPL-3.0-only LICENSE
-  const licensePath = path.join(rootDir, 'LICENSE');
-  const licenseOk = fs.existsSync(licensePath) && fs.readFileSync(licensePath, 'utf-8').includes('GPL-3.0-only');
-  checks.push({
-    id: 'license-gpl3',
-    label: 'GPL-3.0-only License Compliance',
-    status: licenseOk ? 'pass' : 'fail',
-    detail: licenseOk ? 'SPDX GPL-3.0-only verified in LICENSE' : 'Missing or invalid GPL-3.0-only LICENSE',
-  });
+  addCheck(
+    checks,
+    'license-gpl3',
+    'GPL-3.0-only License',
+    licenseOk,
+    licenseOk ? 'Repository license and SDK manifest agree on GPL-3.0-only' : 'LICENSE missing or manifest license mismatch',
+  );
 
-  // 2. Check vst.json manifest
-  const vstPath = path.join(rootDir, 'vst.json');
-  let vstOk = false;
-  let vstDetail = 'vst.json missing';
-  if (fs.existsSync(vstPath)) {
-    try {
-      const vst = JSON.parse(fs.readFileSync(vstPath, 'utf-8'));
-      vstOk = vst.schema === 'open-mpc.vst/v1' && vst.id === 'dust87' && vst.license === 'GPL-3.0-only';
-      vstDetail = vstOk ? `UID ${vst.uid} · ${vst.targets.join(', ')}` : 'Invalid vst.json schema fields';
-    } catch (err) {
-      vstDetail = `JSON parse error: ${(err as Error).message}`;
+  const manifestOk =
+    manifest?.name === "DUST '87" &&
+    manifest.manufacturer === 'Lumina.Aerospace' &&
+    manifest.version === '0.1.0' &&
+    manifest.kind === 'instrument' &&
+    manifest.uid === 'LMD8' &&
+    manifest.license === 'GPL-3.0-only' &&
+    manifest.numInputs === 0 &&
+    manifest.numOutputs === 2;
+  addCheck(
+    checks,
+    'mpc-sdk-manifest',
+    'MPC SDK Plugin Manifest',
+    manifestOk,
+    manifestOk ? `UID ${String(manifest.uid)} · ${String(manifest.kind)} · v${String(manifest.version)}` : manifestResult.error ?? 'SDK manifest identity or I/O fields are invalid',
+  );
+
+  const sourcePath = path.join(projectDir, 'src', 'DUST87.cpp');
+  const source = fs.existsSync(sourcePath) ? fs.readFileSync(sourcePath, 'utf-8') : '';
+  const identityOk =
+    source.includes("MPC_FOURCC('L', 'M', 'D', '8')") &&
+    source.includes('MPC_PLUGIN_ENTRY(DUST87)');
+  addCheck(
+    checks,
+    'native-uid',
+    'Native Plugin UID',
+    identityOk,
+    identityOk ? 'C++ plugin entry and LMD8 UID match the SDK manifest' : 'Native source or matching SDK plugin entry is missing',
+  );
+
+  const catalogResult = readJson(path.join(rootDir, 'catalog', 'plugins', 'dust87.json'));
+  const catalog = catalogResult.value;
+  const catalogOk =
+    catalog?.id === 'dust87' &&
+    catalog.repo === 'Luminous-Works/mpc-vst-Dust-87' &&
+    catalog.name === manifest?.name &&
+    catalog.kind === manifest?.kind &&
+    catalog.license === manifest?.license &&
+    typeof catalog.summary === 'string' &&
+    catalog.summary.length > 0 &&
+    !Object.prototype.hasOwnProperty.call(catalog, 'version') &&
+    !Object.prototype.hasOwnProperty.call(catalog, 'compatibility');
+  addCheck(
+    checks,
+    'open-mpc-catalog',
+    'Open-MPC Catalog Registry Entry',
+    catalogOk,
+    catalogOk ? 'Registry metadata matches the native SDK project' : catalogResult.error ?? 'Registry schema or SDK identity mismatch',
+  );
+
+  const uiResult = readJson(path.join(projectDir, 'ui.json'));
+  const ui = uiResult.value;
+  const expectedControls = new Set(['Master', 'Bit Depth', 'Sample Rate', 'Drive', 'Plate Mix', 'Plate Decay']);
+  const drumLabels = [
+    'Kick', 'Sub', 'Snare', 'Crack', 'Rim', 'Clap', 'CHat', 'OHat', 'LoTom',
+    'MidTom', 'HiTom', 'Crash', 'Ride', 'CBell', 'Clave', 'Shaker', 'Metal', 'Zap',
+  ];
+  for (const label of drumLabels) {
+    expectedControls.add(`${label} Tune`);
+    expectedControls.add(`${label} Decay`);
+    expectedControls.add(`${label} Level`);
+  }
+  const referencedControls = new Set<string>();
+  const pages = Array.isArray(ui?.pages) ? ui.pages : [];
+  let validPageLayout = pages.length === 6 && ui?.qlinkGroups === 'rows';
+  for (const page of pages) {
+    if (!isRecord(page) || !Array.isArray(page.controls) || page.controls.length > 16) {
+      validPageLayout = false;
+      continue;
+    }
+    for (const control of page.controls) {
+      if (control === 'empty') {
+        continue;
+      }
+      if (!isRecord(control) || typeof control.param !== 'string') {
+        validPageLayout = false;
+        continue;
+      }
+      referencedControls.add(control.param);
     }
   }
-  checks.push({
-    id: 'open-mpc-vst-json',
-    label: 'Open-MPC vst.json Manifest',
-    status: vstOk ? 'pass' : 'fail',
-    detail: vstDetail,
-  });
+  const uiOk =
+    uiResult.value !== null &&
+    validPageLayout &&
+    referencedControls.size === expectedControls.size &&
+    [...expectedControls].every((control) => referencedControls.has(control));
+  addCheck(
+    checks,
+    'mpc-touch-ui',
+    'MPC Touch UI Parameters',
+    uiOk,
+    uiOk ? `Six pages cover all ${referencedControls.size} native controls` : uiResult.error ?? 'Touch UI pages or parameter references are invalid',
+  );
 
-  // 3. Check catalog/plugins/dust87.json
-  const catalogPath = path.join(rootDir, 'catalog/plugins/dust87.json');
-  let catOk = false;
-  let catDetail = 'catalog/plugins/dust87.json missing';
-  if (fs.existsSync(catalogPath)) {
-    try {
-      const cat = JSON.parse(fs.readFileSync(catalogPath, 'utf-8'));
-      catOk = cat.id === 'dust87' && cat.license === 'GPL-3.0-only' && cat.compatibility?.gen1 && cat.compatibility?.gen2;
-      catDetail = catOk ? `Catalog ID "${cat.id}" · Gen1 + Gen2 + OS ${cat.compatibility.os_min}` : 'Invalid catalog entry';
-    } catch (err) {
-      catDetail = `JSON parse error: ${(err as Error).message}`;
-    }
-  }
-  checks.push({
-    id: 'open-mpc-catalog',
-    label: 'Open-MPC Catalog Registry Entry',
-    status: catOk ? 'pass' : 'fail',
-    detail: catDetail,
-  });
+  const programCount = (source.match(/addProgram\(\s*"/g) ?? []).length;
+  addCheck(
+    checks,
+    'factory-programs',
+    'Built-in Programs',
+    programCount === 8,
+    `Found ${programCount}/8 built-in program definitions in the native source`,
+  );
 
-  // 4. Check .github/workflows/vst-release.yml
-  const wfPath = path.join(rootDir, '.github/workflows/vst-release.yml');
-  const wfOk = fs.existsSync(wfPath) && fs.readFileSync(wfPath, 'utf-8').includes('vst-release.yml');
-  checks.push({
-    id: 'ci-release-workflow',
-    label: 'Open-MPC CI Release Workflow',
-    status: wfOk ? 'pass' : 'fail',
-    detail: wfOk ? '.github/workflows/vst-release.yml configured' : 'Missing vst-release.yml workflow',
-  });
+  const workflowPath = path.join(rootDir, '.github', 'workflows', 'vst-release.yml');
+  const workflow = fs.existsSync(workflowPath) ? fs.readFileSync(workflowPath, 'utf-8') : '';
+  const reusableRef = workflow.match(
+    /uses:\s*open-mpc\/mpc-vst-plugins\/\.github\/workflows\/vst-release\.yml@([0-9a-f]{40})/,
+  )?.[1];
+  const toolsRef = workflow.match(/tools_ref:\s*([0-9a-f]{40})/)?.[1];
+  const workflowOk =
+    reusableRef !== undefined &&
+    reusableRef === toolsRef &&
+    workflow.includes('sdk_project: plugins/Dust87') &&
+    workflow.includes('tag: dust87-vst-v${{ inputs.version }}') &&
+    workflow.includes('version: ${{ inputs.version }}') &&
+    workflow.includes('dry_run: ${{ inputs.dry_run }}') &&
+    /dry_run:\r?\n[ \t]+description:[^\r\n]*\r?\n[ \t]+type:\s*boolean\r?\n[ \t]+default:\s*true/.test(workflow) &&
+    !/^[ \t]+push:/m.test(workflow);
+  addCheck(
+    checks,
+    'sdk-release-workflow',
+    'Pinned Open-MPC SDK Workflow',
+    workflowOk,
+    workflowOk ? `Reusable workflow and tools are pinned to ${reusableRef}` : 'SDK project, required inputs, immutable pin, or safe trigger configuration is invalid',
+  );
 
-  // 5. Validate all 64 Factory + 16 Starter Presets against lumina.plugin/v1
-  const factoryPresets = BUILTIN_PRESETS.filter((p) => p.bank_type === 'factory');
-  const starterPresets = BUILTIN_PRESETS.filter((p) => p.bank_type === 'starter');
-  let validFactory = 0;
-  let validStarter = 0;
-
-  for (const p of factoryPresets) {
-    if (validateDust87Preset(p).valid) validFactory++;
-  }
-  for (const p of starterPresets) {
-    if (validateDust87Preset(p).valid) validStarter++;
-  }
-
-  const presetsOk = validFactory === 64 && validStarter === 16;
-  checks.push({
-    id: 'preset-bank-integrity',
-    label: 'Factory (64) & Starter (16) Preset Schema',
-    status: presetsOk ? 'pass' : 'fail',
-    detail: `Validated ${validFactory}/64 factory and ${validStarter}/16 starter presets against lumina.plugin/v1`,
-  });
-
-  // 6. Verify Quarantine Rejection of Corrupt JSON
-  const corruptSample = { schema: 'broken.schema/v0', name: '', license: 'PROPRIETARY', engine: { bit: 7 } };
-  const corruptRes = validateDust87Preset(corruptSample);
-  const quarantineGuardOk = !corruptRes.valid && corruptRes.errors.length >= 3;
-  checks.push({
-    id: 'quarantine-guard',
-    label: 'Schema Validator & Quarantine Guard',
-    status: quarantineGuardOk ? 'pass' : 'fail',
-    detail: quarantineGuardOk
-      ? `Rejected malformed preset (${corruptRes.errors.length} schema violations caught)`
-      : 'Validator failed to catch malformed test payload',
-  });
-
-  // 7. Verify Q4 Cross-Platform Directory Resolver
-  const linuxPaths = resolveDust87Paths({ platform: 'linux', homeDir: '/home/mpc' });
-  const macPaths = resolveDust87Paths({ platform: 'darwin', homeDir: '/Users/tyrone' });
-  const winPaths = resolveDust87Paths({ platform: 'win32', homeDir: 'C:\\Users\\tyrone' });
-  const resolverOk =
-    linuxPaths.userPresetsDir.includes('Lumina.Aerospace/DUST87') &&
-    macPaths.userPresetsDir.includes('Library/Application Support/Lumina.Aerospace/DUST87') &&
-    winPaths.userPresetsDir.includes('Lumina.Aerospace\\DUST87');
-  checks.push({
-    id: 'q4-path-resolver',
-    label: 'Q4 Cross-Platform Directory Resolver',
-    status: resolverOk ? 'pass' : 'fail',
-    detail: resolverOk
-      ? 'Verified Linux/MPC, macOS Application Support, and Windows AppData targets'
-      : 'Path resolution mismatch',
-  });
-
-  const passedChecks = checks.filter((c) => c.status === 'pass').length;
-
+  const passedChecks = checks.filter((check) => check.status === 'pass').length;
+  const version = typeof manifest?.version === 'string' ? manifest.version : 'unknown';
   return {
-    pluginName: "DUST '87",
-    version: 'v0.1.0',
-    license: 'GPL-3.0-only',
+    pluginName: typeof manifest?.name === 'string' ? manifest.name : "DUST '87",
+    version,
+    license: typeof manifest?.license === 'string' ? manifest.license : 'unknown',
     timestamp: new Date().toISOString(),
     passed: passedChecks === checks.length,
     summary: {
       totalChecks: checks.length,
       passedChecks,
-      factoryPresetsVerified: validFactory,
-      starterPresetsVerified: validStarter,
+      factoryPresetsVerified: programCount,
+      starterPresetsVerified: 0,
       userPresetsVerified: userPresetsCount,
       quarantinedFilesCount: quarantinedCount,
     },
@@ -139,7 +193,6 @@ export function runAutomatedPluginValidation(rootDir = process.cwd(), quarantine
   };
 }
 
-// Execute when invoked directly via `npm run validate`
 const isDirectRun = process.argv[1] && process.argv[1].endsWith('validate-plugin.ts');
 if (isDirectRun) {
   const report = runAutomatedPluginValidation();

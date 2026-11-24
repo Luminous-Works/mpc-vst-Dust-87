@@ -1,30 +1,52 @@
-name: Open-MPC VST Release & Validation
+name: DUST '87 MPC SDK release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  pull_request:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Version to build, without a leading v
+        type: string
+        required: true
+        default: '0.1.0'
+      dry_run:
+        description: Build and test artifacts without creating a draft release
+        type: boolean
+        default: true
 
 jobs:
-  validate-dust87:
-    name: Validate Preset Schema, Quarantine & Manifests
+  validate-native:
+    name: Build and host-test the MPC SDK plugin
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: '22'
-      - run: npm ci
-      - run: npm run validate
-      - run: npm run lint
-      - run: npm run build
+          repository: open-mpc/mpc-vst-plugins
+          ref: 1777e405a4c15c380f7a1b1adf673dd73c1a0585
+          path: mpc-vst-plugins
+      - name: Fetch the pinned MPC Plugin SDK
+        run: git -C mpc-vst-plugins submodule update --init --depth 1 vendor/mpc-plugin-builder-sdk
+      - name: Check manifests and release metadata
+        run: python3 scripts/test_release_readiness.py
+      - name: Build native, ARM32, and ARM64 plugins
+        run: python3 mpc-vst-plugins/vendor/mpc-plugin-builder-sdk/tools/build.py plugins/Dust87 --target all
+      - name: Run the MPC host simulator
+        run: mpc-vst-plugins/vendor/mpc-plugin-builder-sdk/.sdk-tools/host_sim plugins/Dust87/build/native/dust--87.so test --wav plugins/Dust87/build/test.wav
 
   open-mpc-release:
-    name: Package Open-MPC Multi-Arch Release
-    needs: validate-dust87
-    uses: open-mpc/mpc-vst-plugins/.github/workflows/vst-release.yml@main
+    name: Package Open-MPC release artifacts
+    if: github.event_name == 'workflow_dispatch'
+    needs: validate-native
+    permissions:
+      contents: write
+    uses: open-mpc/mpc-vst-plugins/.github/workflows/vst-release.yml@1777e405a4c15c380f7a1b1adf673dd73c1a0585
     with:
-      vst_json: vst.json
-      catalog_entry: catalog/plugins/dust87.json
+      tag: dust87-vst-v${{ inputs.version }}
+      version: ${{ inputs.version }}
+      tools_ref: 1777e405a4c15c380f7a1b1adf673dd73c1a0585
+      sdk_project: plugins/Dust87
       plugin_id: dust87
+      license: GPL-3.0-only
+      about: Native MPC SDK drum instrument with 18 procedural percussion voices, lo-fi reduction, and plate-style reverb.
+      dry_run: ${{ inputs.dry_run }}
