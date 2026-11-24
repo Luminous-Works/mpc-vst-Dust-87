@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECT = ROOT / "plugins" / "Dust87"
+PROJECT = ROOT
 DRUM_LABELS = [
     "Kick", "Sub", "Snare", "Crack", "Rim", "Clap", "CHat", "OHat",
     "LoTom", "MidTom", "HiTom", "Crash", "Ride", "CBell", "Clave",
@@ -45,6 +45,14 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertEqual(referenced, expected)
         self.assertEqual(ui["qlinkGroups"], "rows")
 
+    def test_readme_shows_generated_ui_and_states_device_capture_status(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("docs/screenshots/contact-sheet.png", readme)
+        self.assertIn("docs/screenshots/mix-layout.png", readme)
+        self.assertIn("not screenshots captured from MPC hardware", readme)
+        self.assertTrue((ROOT / "docs" / "screenshots" / "contact-sheet.png").is_file())
+        self.assertTrue((ROOT / "docs" / "screenshots" / "mix-layout.png").is_file())
+
     def test_catalog_entry_uses_registry_schema_and_sdk_identity(self):
         manifest = json.loads((PROJECT / "plugin.json").read_text(encoding="utf-8"))
         entry = json.loads((ROOT / "catalog" / "plugins" / "dust87.json").read_text(encoding="utf-8"))
@@ -69,7 +77,8 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertIsNotNone(uses)
         self.assertIsNotNone(tools_ref)
         self.assertEqual(uses.group(1), tools_ref.group(1))
-        self.assertIn("sdk_project: plugins/Dust87", workflow)
+        self.assertIn("sdk_project: .", workflow)
+        self.assertIn("tools/build.py . --target all", workflow)
         self.assertIn("tag:", workflow)
         self.assertIn("version:", workflow)
         self.assertIn("dry_run:", workflow)

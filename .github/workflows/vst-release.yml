@@ -30,9 +30,9 @@ jobs:
       - name: Check manifests and release metadata
         run: python3 scripts/test_release_readiness.py
       - name: Build native, ARM32, and ARM64 plugins
-        run: python3 mpc-vst-plugins/vendor/mpc-plugin-builder-sdk/tools/build.py plugins/Dust87 --target all
+        run: python3 mpc-vst-plugins/vendor/mpc-plugin-builder-sdk/tools/build.py . --target all
       - name: Run the MPC host simulator
-        run: mpc-vst-plugins/vendor/mpc-plugin-builder-sdk/.sdk-tools/host_sim plugins/Dust87/build/native/dust--87.so test --wav plugins/Dust87/build/test.wav
+        run: mpc-vst-plugins/vendor/mpc-plugin-builder-sdk/.sdk-tools/host_sim build/native/dust--87.so test --wav build/test.wav
 
   open-mpc-release:
     name: Package Open-MPC release artifacts
@@ -45,7 +45,7 @@ jobs:
       tag: dust87-vst-v${{ inputs.version }}
       version: ${{ inputs.version }}
       tools_ref: 1777e405a4c15c380f7a1b1adf673dd73c1a0585
-      sdk_project: plugins/Dust87
+      sdk_project: .
       plugin_id: dust87
       license: GPL-3.0-only
       about: Native MPC SDK drum instrument with 18 procedural percussion voices, lo-fi reduction, and plate-style reverb.
