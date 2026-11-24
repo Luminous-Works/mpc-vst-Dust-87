@@ -1,0 +1,78 @@
+{
+  "kit": "amber",
+  "qlinkGroups": "rows",
+  "pages": [
+    {
+      "name": "MIX",
+      "controls": [
+        { "param": "Master", "widget": "fader" },
+        { "param": "Bit Depth", "widget": "switch" },
+        { "param": "Sample Rate", "widget": "switch" },
+        { "param": "Drive", "widget": "knob" },
+        { "param": "Plate Mix", "widget": "fader" },
+        { "param": "Plate Decay", "widget": "knob" },
+        "empty",
+        "empty",
+        "empty",
+        "empty",
+        "empty",
+        "empty",
+        "empty",
+        "empty",
+        "empty",
+        "empty"
+      ]
+    },
+    {
+      "name": "KICK",
+      "controls": [
+        { "param": "Kick Tune", "widget": "knob" }, { "param": "Kick Decay", "widget": "fader" }, { "param": "Kick Level", "widget": "fader" }, "empty",
+        { "param": "Sub Tune", "widget": "knob" }, { "param": "Sub Decay", "widget": "fader" }, { "param": "Sub Level", "widget": "fader" }, "empty",
+        { "param": "Snare Tune", "widget": "knob" }, { "param": "Snare Decay", "widget": "fader" }, { "param": "Snare Level", "widget": "fader" }, "empty",
+        { "param": "Crack Tune", "widget": "knob" }, { "param": "Crack Decay", "widget": "fader" }, { "param": "Crack Level", "widget": "fader" }, "empty"
+      ]
+    },
+    {
+      "name": "SNARE",
+      "controls": [
+        { "param": "Rim Tune", "widget": "knob" }, { "param": "Rim Decay", "widget": "fader" }, { "param": "Rim Level", "widget": "fader" }, "empty",
+        { "param": "Clap Tune", "widget": "knob" }, { "param": "Clap Decay", "widget": "fader" }, { "param": "Clap Level", "widget": "fader" }, "empty",
+        { "param": "CHat Tune", "widget": "knob" }, { "param": "CHat Decay", "widget": "fader" }, { "param": "CHat Level", "widget": "fader" }, "empty",
+        { "param": "OHat Tune", "widget": "knob" }, { "param": "OHat Decay", "widget": "fader" }, { "param": "OHat Level", "widget": "fader" }, "empty"
+      ]
+    },
+    {
+      "name": "TOMS",
+      "controls": [
+        { "param": "LoTom Tune", "widget": "knob" }, { "param": "LoTom Decay", "widget": "fader" }, { "param": "LoTom Level", "widget": "fader" }, "empty",
+        { "param": "MidTom Tune", "widget": "knob" }, { "param": "MidTom Decay", "widget": "fader" }, { "param": "MidTom Level", "widget": "fader" }, "empty",
+        { "param": "HiTom Tune", "widget": "knob" }, { "param": "HiTom Decay", "widget": "fader" }, { "param": "HiTom Level", "widget": "fader" }, "empty",
+        { "param": "Crash Tune", "widget": "knob" }, { "param": "Crash Decay", "widget": "fader" }, { "param": "Crash Level", "widget": "fader" }, "empty"
+      ]
+    },
+    {
+      "name": "PERC",
+      "controls": [
+        { "param": "Ride Tune", "widget": "knob" }, { "param": "Ride Decay", "widget": "fader" }, { "param": "Ride Level", "widget": "fader" }, "empty",
+        { "param": "CBell Tune", "widget": "knob" }, { "param": "CBell Decay", "widget": "fader" }, { "param": "CBell Level", "widget": "fader" }, "empty",
+        { "param": "Clave Tune", "widget": "knob" }, { "param": "Clave Decay", "widget": "fader" }, { "param": "Clave Level", "widget": "fader" }, "empty",
+        { "param": "Shaker Tune", "widget": "knob" }, { "param": "Shaker Decay", "widget": "fader" }, { "param": "Shaker Level", "widget": "fader" }, "empty"
+      ]
+    },
+    {
+      "name": "MORE",
+      "controls": [
+        { "param": "Metal Tune", "widget": "knob" }, { "param": "Metal Decay", "widget": "fader" }, { "param": "Metal Level", "widget": "fader" }, "empty",
+        { "param": "Zap Tune", "widget": "knob" }, { "param": "Zap Decay", "widget": "fader" }, { "param": "Zap Level", "widget": "fader" }, "empty",
+        "empty", "empty", "empty", "empty",
+        "empty", "empty", "empty", "empty"
+      ]
+    }
+  ],
+  "style": {
+    "background": "ff1e1d1e",
+    "accent": "ffd31145",
+    "text": "ffffffff",
+    "muted": "ff6a6a6c"
+  }
+}

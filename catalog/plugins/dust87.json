@@ -2,16 +2,9 @@
   "id": "dust87",
   "name": "DUST '87",
   "author": "Lumina.Aerospace",
-  "version": "v0.1.0",
+  "repo": "Luminous-Works/mpc-vst-Dust-87",
+  "kind": "instrument",
   "license": "GPL-3.0-only",
-  "category": "INSTRUMENT",
-  "tags": ["DRUMS", "SAMPLER ROMPLER", "12-BIT", "SEQUENCER", "PLATE REVERB", "TOUCH"],
-  "compatibility": {
-    "gen1": true,
-    "gen2": true,
-    "os_min": "3.10.1+"
-  },
-  "description": "Original 12-bit lo-fi drum sampler inspired by early-80s digital hardware. Features touch-first 48px+ targets, 4x3 swipeable pad banks, per-voice MIDI channels with combo fallback, interactive amp & pitch envelope displays, Q-Link MIDI learn, plate reverb, optional 64-step sequencer, and schema-validated presets with corrupt file quarantine.",
-  "preset_schema": "lumina.plugin/v1",
-  "workflow_url": "https://open-mpc.github.io/workflow.html"
+  "summary": "Native MPC SDK drum instrument with 18 procedural percussion voices, lo-fi bit and sample-rate reduction, drive, and plate-style reverb.",
+  "tags": ["drums", "lo-fi", "12-bit", "plate-reverb"]
 }
